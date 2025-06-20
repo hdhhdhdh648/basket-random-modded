@@ -72,7 +72,8 @@ ctx.msImageSmoothingEnabled = false
 canvas.width = "2000"
 canvas.height = "1000"
 
-import planck from "planck"
+// import planck from 'planck'
+import planck from 'https://unpkg.com/planck-js@latest/dist/planck.mjs'
 const pl = planck
 const Vec2 = pl.Vec2
 const world = new pl.World(Vec2(0, -15))
