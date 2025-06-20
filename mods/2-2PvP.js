@@ -10,7 +10,7 @@ import {
   updateScore,
   displayMessage,
 } from "../mod-dependencies/graphics.js"
-import { endGame } from "../menu.js"
+import { endGame } from "../src/menu.js"
 
 // Values
 

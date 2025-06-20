@@ -12,6 +12,7 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
-    "planck": "^1.4.2"
+    "planck": "^1.4.2",
+    "planck-js": "^1.3.0"
   }
 }
