@@ -1,0 +1,118 @@
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#menu-cover {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    /* background-color: rgba(0,0,0,1); */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 201;
+}
+
+#button-list {
+    height: 40%;
+    width: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4vw;
+}
+
+#canvas-container {
+    position: absolute;
+    /* top: 100px; */
+
+    aspect-ratio: 2 / 1;
+    max-width: 100%; 
+    max-height: 100%;
+    display: block;
+    /* overflow:visible; */
+    /* z-index: 1; */
+
+    pointer-events: none;
+}
+
+canvas {
+    height: 100%;
+    width: 100%;
+
+    position: relative;
+    z-index: 100;
+    /* background-color: blue; */
+}
+
+.game-button {
+    height: 150px;
+    aspect-ratio: 1/1;
+    position: relative;
+}
+
+/* @keyframes basketAnimation {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(200px);
+  }
+} */
+
+.basketAnimation {
+    animation: basketAnimation 1.5s ease forwards;
+    z-index: 105;
+    position: absolute;
+}
+
+#map-container {
+    height: 100%;
+    width: 100%;
+    position: fixed;
+}
+
+@keyframes basketAnimation {
+  0% {
+    transform: translateX(-50vw) rotate(0deg);
+    width: 25%
+  }
+  15.55% {
+    transform: translateX(0) rotate(0deg);
+    width: 45%
+  }
+  22.22% {
+    transform: translateX(0) rotate(10deg);;
+    width: 45%
+  }
+  44.44% {
+    transform: translateX(0) rotate(-10deg);
+    width: 45%
+  }
+  55.55% {
+    transform: translateX(0) rotate(10deg);
+    width: 45%
+  }
+  77.78% {
+    transform: translateX(0) rotate(-10deg);
+    width: 45%
+  }
+  84.44% {
+    transform: translateX(0) rotate(10deg);
+    width: 45%
+  }
+  90% {
+    transform: rotate(0deg); 
+    width: 25%
+  }
+  100% {
+    transform: translateX(100vw) rotate(0deg); 
+    width: 25%
+  }
+}
