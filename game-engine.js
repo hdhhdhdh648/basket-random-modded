@@ -48,7 +48,7 @@ let playerJointList = {} // id, [feetBodyJoint, headHitboxBodyJoint, headBodyJoi
 let playerSideList = {} // id, "normal"/"flip"
 let playerFeetList = {} // playerId, body
 let armSizeList = {} // id, size: num
-let textureList = {} // id, [armTexture, headTexture, bodyTexture]
+let textureList = {} // id, [armAttachedTextures, headAttachedTextures, bodyAttachedTextures]
 let playerTeam = {} // playerId, teamId
 
 // let playerShadows = {} // playerId, shadow
@@ -145,11 +145,19 @@ GameEngine.on(
     y,
     id,
     team,
+    reach,
     armSize,
-    armTexture,
-    headTexture,
-    bodyTexture,
-    attachedTextures,
+    armWidth,
+    armAttachedTextures,
+    headAttachedTextures,
+    bodyAttachedTextures,
+    // armTexture,
+    // armTextureOffset,
+    // headTexture,
+    // headTextureOffset,
+    // bodyTexture,
+    // bodyTextureOffset,
+    // attachedTextures,
   }) => {
     spawnPlayer(
       side,
@@ -157,11 +165,19 @@ GameEngine.on(
       y,
       id,
       team,
+      reach,
       armSize,
-      armTexture,
-      headTexture,
-      bodyTexture,
-      attachedTextures
+      armWidth,
+      armAttachedTextures,
+      headAttachedTextures,
+      bodyAttachedTextures
+      // armTexture,
+      // armTextureOffset,
+      // headTexture,
+      // headTextureOffset,
+      // bodyTexture,
+      // bodyTextureOffset,
+      // attachedTextures
     )
   }
 )
@@ -308,15 +324,15 @@ function killHandler() {
     playerList[id] = null
 
     playerIsPickedUpBall[id] = null
-  playerBallReach[id] = null
-  playerBalanceAngleList[id] = null
-  playerPickedUpBall[id] = null
-  playerAirborne[id] = null
-  playerIsPickedUpBall[id] = null
-  playerTeam[id] = null
-  playerSideList[id] = null
-  playerFeetList[id] = null
-  isPlayerPickingUpDisabled[id] = null
+    playerBallReach[id] = null
+    playerBalanceAngleList[id] = null
+    playerPickedUpBall[id] = null
+    playerAirborne[id] = null
+    playerIsPickedUpBall[id] = null
+    playerTeam[id] = null
+    playerSideList[id] = null
+    playerFeetList[id] = null
+    isPlayerPickingUpDisabled[id] = null
   }
   playersToKill.length = 0
 
@@ -333,7 +349,6 @@ function killHandler() {
 }
 
 function KillPlayer(id) {
-
   for (let index in playerList[id]) {
     bodiesToDestroy.push(playerList[id][index])
     // world.destroyBody(playerList[id][index])
@@ -419,7 +434,6 @@ function spawnBall(
   bounciness = 0.6,
   density = 0.01
 ) {
-
   console.log(frameList)
 
   const ball = world.createDynamicBody(Vec2(x, y + RAISE))
@@ -614,12 +628,20 @@ function spawnPlayer(
   y,
   id,
   team,
-  armSize,
-  armTexture,
-  headTexture,
-  bodyTexture,
-  attachedTextures,
-  reach = 1.8
+  reach = 1.8,
+  armSize = 1.2,
+  armWidth = 0.3,
+  armAttachedTextures,
+  headAttachedTextures,
+  bodyAttachedTextures
+  // armTexture,
+  // armTextureOffset = [0,0,0,0],
+  // headTexture,
+  // headTextureOffset = [0,0,0,0],
+  // bodyTexture,
+  // bodyTextureOffset = [0,0,0,0],
+  // attachedTextures = [],
+  // reach = 1.8
 ) {
   playerTeam[id] = team
 
@@ -633,7 +655,7 @@ function spawnPlayer(
 
   playerBallReach[id] = reach
 
-  textureList[id] = [armTexture, headTexture, bodyTexture]
+  textureList[id] = [armAttachedTextures, headAttachedTextures, bodyAttachedTextures]
 
   // Feet
   const feet = world.createDynamicBody(Vec2(x, 1.4 + RAISE - 0.9))
@@ -682,18 +704,24 @@ function spawnPlayer(
     filterMaskBits: 0x0001,
   })
   // Arm
-  if (armSize === "normal") armSize = 1.2
+  if (armSize === "normal") {
+    armSize = 1.2
+  } else if (armSize === "short") {
+    armSize = 0.95
+  } else if (armSize === "long") {
+    armSize = 1.45
+  }
   const arm = world.createDynamicBody(
-    Vec2(x + 0.4 * side, 3.8 - armSize / 2 + RAISE - 0.9)
+    Vec2(x + 0.4 * side, 3.45 - armSize + RAISE)
   )
-  arm.createFixture(pl.Box(0.2, armSize), {
-    density: 0.01,
+  arm.createFixture(pl.Box(0.3, armSize), {
+    density: 0.02,
     friction: 0.3,
     isSensor: true,
   })
   // Hand
   const hand = world.createDynamicBody(
-    Vec2(x + 0.4 * side, 3.8 - (armSize * 3) / 2 + RAISE - 0.9)
+    Vec2(x + 0.4 * side, 3.9 - (armSize * 3) / 2 + RAISE - 0.9)
   )
   hand.createFixture(pl.Box(0.2, 0.2), {
     density: 0.01,
@@ -802,51 +830,109 @@ function pointArmRightDown(arm, targetAngle = 0, stiffness = 4, damping = 0.5) {
 
 // Render functions
 
-function renderHead(id, head) {
-  const pos = head.getPosition()
-  const angle = head.getAngle()
+function renderImage(image, flip, body, xOffset, yOffset, xScale, yScale) {
+  const pos = body.getPosition()
+  const angle = body.getAngle()
   const canvasPos = toCanvas(pos)
-
+  
   ctx.save()
   ctx.translate(canvasPos.x, canvasPos.y)
   ctx.rotate(-angle)
-
-  if (playerSideList[id] === "flip") {
+  
+  if (flip === true) {
     ctx.scale(-1, 1)
   }
 
   ctx.drawImage(
-    textureList[id][1],
-    -SCALE / 2,
-    -SCALE / 2,
-    SCALE,
-    (SCALE * 10) / 8
-  )
+    image,
+    -xScale / 2 + xOffset,
+    -yScale / 2 + yOffset,
+    xScale,
+    yScale
+  );
 
   ctx.restore()
+}
+
+function renderHead(id) {
+  let [armAttachedTextures, headAttachedTextures, bodyAttachedTextures] = textureList[id]
+  let [feet, body, head, arm] = playerList[id]
+
+  let flip = false
+  if (playerSideList[id] === "flip") {
+    flip = true
+  }
+
+  // renderBox(head)
+
+  for (let index in headAttachedTextures) {
+    let textureInfo = headAttachedTextures[index]
+    console.log(textureInfo)
+    let [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
+    renderImage(image,flip,head, xOffset, yOffset, xScale, yScale)
+  }
+}
+
+function renderBody(id) {
+  let [armAttachedTextures, headAttachedTextures, bodyAttachedTextures] = textureList[id]
+  let [feet, body, head, arm] = playerList[id]
+
+  let flip = false
+  if (playerSideList[id] === "flip") {
+    flip = true
+  }
+
+  // renderBox(body)
+
+  for (let index in bodyAttachedTextures) {
+    let textureInfo = bodyAttachedTextures[index]
+    let [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
+    renderImage(image,flip,body, xOffset, yOffset, xScale, yScale)
+  }
+}
+
+function renderArm(id) {
+  let [armAttachedTextures, headAttachedTextures, bodyAttachedTextures] = textureList[id]
+  let [feet, body, head, arm] = playerList[id]
+
+  let flip = false
+  if (playerSideList[id] === "flip") {
+    flip = true
+  }
+
+  // renderBox(arm)
+
+  for (let index in armAttachedTextures) {
+    let textureInfo = armAttachedTextures[index]
+    let [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
+    renderImage(image,flip,arm, xOffset, yOffset, xScale, yScale)
+  }
 }
 
 function renderBall(ball, size, frameList, frameIndex) {
   if (!ball) {
     return
   }
-  const pos = ball.getPosition()
-  const angle = ball.getAngle()
-  const canvasPos = toCanvas(pos)
 
-  ctx.save()
-  ctx.translate(canvasPos.x, canvasPos.y)
-  ctx.rotate(-angle)
+  // const pos = ball.getPosition()
+  // const angle = ball.getAngle()
+  // const canvasPos = toCanvas(pos)
 
-  ctx.drawImage(
-    frameList[frameIndex],
-    (-SCALE / 2) * 2 * size,
-    (-SCALE / 2) * 2 * size,
-    SCALE * 2 * size,
-    SCALE * 2 * size
-  )
+  // ctx.save()
+  // ctx.translate(canvasPos.x, canvasPos.y)
+  // ctx.rotate(-angle)
 
-  ctx.restore()
+  // ctx.drawImage(
+  //   frameList[frameIndex],
+  //   (-SCALE / 2) * 2 * size,
+  //   (-SCALE / 2) * 2 * size,
+  //   SCALE * 2 * size,
+  //   SCALE * 2 * size
+  // )
+
+  // ctx.restore()
+
+  renderImage(frameList[frameIndex], false, ball, 0, 0, 60, 60)
 }
 
 function renderBalls() {
@@ -880,55 +966,57 @@ function renderBallsPickedUp() {
   }
 }
 
-function renderArm(id, arm) {
-  const pos = arm.getPosition()
-  const angle = arm.getAngle()
-  const canvasPos = toCanvas(pos)
+// function renderArm(id, arm) {
+//   const pos = arm.getPosition()
+//   const angle = arm.getAngle()
+//   const canvasPos = toCanvas(pos)
 
-  let multiplier = armSizeList[id]
+//   let multiplier = armSizeList[id]
 
-  ctx.save()
-  ctx.translate(canvasPos.x, canvasPos.y)
-  ctx.rotate(-angle)
+//   ctx.save()
+//   ctx.translate(canvasPos.x, canvasPos.y)
+//   ctx.rotate(-angle)
 
-  if (playerSideList[id] === "flip") {
-    ctx.scale(-1, 1)
-  }
+//   if (playerSideList[id] === "flip") {
+//     ctx.scale(-1, 1)
+//   }
 
-  ctx.drawImage(
-    textureList[id][0],
-    -SCALE / 4,
-    -SCALE * multiplier,
-    SCALE / 2,
-    SCALE * 2 * multiplier
-  )
+//   ctx.drawImage(
+//     textureList[id][0],
+//     -SCALE / 4,
+//     -SCALE * multiplier,
+//     SCALE / 2,
+//     SCALE * 2 * multiplier
+//   )
 
-  ctx.restore()
-}
+//   ctx.restore()
 
-function renderBody(id, body) {
-  const pos = body.getPosition()
-  const angle = body.getAngle()
-  const canvasPos = toCanvas(pos)
+//   // renderBox(arm, "green")
+// }
 
-  ctx.save()
-  ctx.translate(canvasPos.x, canvasPos.y)
-  ctx.rotate(-angle)
+// function renderBody(id, body) {
+//   const pos = body.getPosition()
+//   const angle = body.getAngle()
+//   const canvasPos = toCanvas(pos)
 
-  if (playerSideList[id] === "flip") {
-    ctx.scale(-1, 1)
-  }
+//   ctx.save()
+//   ctx.translate(canvasPos.x, canvasPos.y)
+//   ctx.rotate(-angle)
 
-  ctx.drawImage(
-    textureList[id][2],
-    -SCALE / 1.5,
-    -SCALE * 1.5,
-    SCALE * 1.2,
-    SCALE * 3.5
-  )
+//   if (playerSideList[id] === "flip") {
+//     ctx.scale(-1, 1)
+//   }
 
-  ctx.restore()
-}
+//   ctx.drawImage(
+//     textureList[id][2],
+//     -SCALE / 1.5,
+//     -SCALE * 1.5,
+//     SCALE * 1.2,
+//     SCALE * 3.5
+//   )
+
+//   ctx.restore()
+// }
 
 function renderHoopShadows() {
   renderShadow(HOOP_DISTANCE, RAISE, 0.6, 0.35, hoopShadowImage, 2.2)
@@ -1353,7 +1441,6 @@ function scoreRightHandler() {
 }
 
 function simulate() {
-
   scoreLeftHandler()
   scoreRightHandler()
 
@@ -1392,8 +1479,8 @@ function simulate() {
 
     // RENDER FUNCTIONS
 
-    renderHead(id, head)
-    renderBody(id, body)
+    renderHead(id)
+    renderBody(id)
 
     // TO DELETE, FOR TESTING
     // renderBox(hoopRightTarget, "green")
@@ -1407,7 +1494,7 @@ function simulate() {
   renderBallsPickedUp()
 
   for (let [id, [feet, body, head, arm]] of Object.entries(playerList)) {
-    renderArm(id, arm)
+    renderArm(id)
   }
 }
 

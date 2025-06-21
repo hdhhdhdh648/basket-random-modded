@@ -10,7 +10,7 @@ import {
   updateScore,
   displayMessage,
 } from "../mod-dependencies/graphics.js"
-import { endGame } from "../src/menu.js"
+import { endGame } from "../menu.js"
 
 // Values
 
@@ -63,6 +63,7 @@ function getModifiers() {
     "LARGE HOOP",
     "LARGE HOOP",
   ]
+
   const ballPool = ["HEAVY BALL", "LIGHT BALL", "DOUBLE POINT"]
   const hoopPool = ["SHORT HOOP", "TALL HOOP"]
   const headPool = ["SMALL HEAD", "BIG HEAD"]
@@ -130,6 +131,72 @@ let lightBallAnimation = [
   getImage("media/ball/light-4.png"),
   getImage("media/ball/light-5.png"),
   getImage("media/ball/light-6.png"),
+]
+
+let bodyTextures = [
+  getImage("media/body/right-1.png"),
+  getImage("media/body/right-2.png"),
+  getImage("media/body/right-3.png"),
+  getImage("media/body/right-4.png"),
+  getImage("media/body/right-5.png"),
+]
+
+let normalArmTextures = [
+  getImage("media/arm/right-1.png"),
+  getImage("media/arm/right-2.png"),
+  getImage("media/arm/right-3.png"),
+  getImage("media/arm/right-4.png"),
+  getImage("media/arm/right-5.png"),
+]
+
+let shortArmTextures = [
+  getImage("media/arm/right-short-1.png"),
+  getImage("media/arm/right-short-2.png"),
+  getImage("media/arm/right-short-3.png"),
+  getImage("media/arm/right-short-4.png"),
+  getImage("media/arm/right-short-5.png"),
+]
+
+let longArmTextures = [
+  getImage("media/arm/right-long-1.png"),
+  getImage("media/arm/right-long-2.png"),
+  getImage("media/arm/right-long-3.png"),
+  getImage("media/arm/right-long-4.png"),
+  getImage("media/arm/right-long-5.png"),
+]
+
+let headTextures = [
+  getImage("media/head/right-1.png"),
+  getImage("media/head/right-2.png"),
+  getImage("media/head/right-3.png"),
+  getImage("media/head/right-4.png"),
+  getImage("media/head/right-5.png"),
+]
+
+let shoeTextures = [
+  getImage("media/shoe/right-1.png"),
+  getImage("media/shoe/right-2.png"),
+  getImage("media/shoe/right-3.png"),
+  getImage("media/shoe/right-4.png"),
+  getImage("media/shoe/right-5.png"),
+  getImage("media/shoe/right-6.png"),
+  getImage("media/shoe/right-7.png"),
+  getImage("media/shoe/right-8.png"),
+  getImage("media/shoe/right-9.png"),
+  getImage("media/shoe/right-10.png"),
+]
+
+let outfitTextures = [
+  [getImage("media/tops/formal-1.png"), getImage("media/pants/formal-1.png")],
+  [getImage("media/tops/formal-2.png"), getImage("media/pants/formal-1.png")],
+  [getImage("media/tops/normal-1.png"), getImage("media/pants/normal-1.png")],
+  [getImage("media/tops/normal-2.png"), getImage("media/pants/normal-2.png")],
+  [getImage("media/tops/normal-3.png"), getImage("media/pants/normal-3.png")],
+  [getImage("media/tops/normal-4.png"), getImage("media/pants/normal-4.png")],
+  [getImage("media/tops/normal-5.png"), getImage("media/pants/normal-5.png")],
+  [getImage("media/tops/normal-6.png"), getImage("media/pants/normal-6.png")],
+  [getImage("media/tops/normal-7.png"), getImage("media/pants/normal-7.png")],
+  [getImage("media/tops/normal-8.png"), getImage("media/pants/normal-8.png")],
 ]
 
 let heavyBallAnimation = [getImage("media/ball/heavy-1.png")]
@@ -253,13 +320,13 @@ function spawnBall(x, y, id, size, kind) {
   let bounciness = 0.6
   let density = 0.01
 
-  if (kind === "DOUBLE POINT") {
+  if (kind === "double") {
     frameList = doubleBallAnimation
-  } else if (kind === "HEAVY BALL") {
+  } else if (kind === "heavy") {
     bounciness = 0
     density = 0.05
     frameList = heavyBallAnimation
-  } else if (kind === "LIGHT BALL") {
+  } else if (kind === "light") {
     bounciness = 0.9
     frameList = lightBallAnimation
   }
@@ -276,21 +343,31 @@ function spawnBall(x, y, id, size, kind) {
   })
 }
 
-function spawnPlayer(side, x, y, id) {
-  let top = new Image()
-  top.src = "media/tops/normal-1.png"
+function spawnPlayer(side, x, y, id, armSize, outfitIndex) {
+  let skinColor = getRandomInt(0, 4)
+  let armOffsetInfo = [0, 0, 0.5 * 59, 0.5 * 238]
 
-  let pants = new Image()
-  pants.src = "media/pants/normal-1.png"
+  let armRightImage = normalArmTextures[skinColor]
+  if (armSize === "short") {
+    armOffsetInfo = [0, 0, 0.2 * 150, 0.2 * 480]
+    armRightImage = shortArmTextures[skinColor]
+  } else if (armSize === "long") {
+    armOffsetInfo = [0, 0, 0.15 * 200, 0.15 * 960]
+    armRightImage = longArmTextures[skinColor]
+  }
 
-  let armRightNormalImage = new Image()
-  armRightNormalImage.src = "media/arm-right-normal.png"
+  // let headRightImage = new Image()
+  // headRightImage.src = "media/head-right.png"
 
-  let headRightImage = new Image()
-  headRightImage.src = "media/head-right.png"
+  let headRightImage = headTextures[skinColor]
 
-  let bodyRightImage = new Image()
-  bodyRightImage.src = "media/body-right.png"
+  let bodyRightImage = bodyTextures[skinColor]
+
+  let shoeTexture = shoeTextures[0]
+
+  let [topTexture, pantsTexture] = outfitTextures[outfitIndex]
+  // let bodyRightImage = new Image()
+  // bodyRightImage.src = "media/body-right.png"
 
   GameEngine.emit("spawnPlayer", {
     side: side,
@@ -298,10 +375,15 @@ function spawnPlayer(side, x, y, id) {
     y: y,
     id: id,
     team: 2,
-    armSize: "normal",
-    armTexture: armRightNormalImage,
-    headTexture: headRightImage,
-    bodyTexture: bodyRightImage,
+    armSize: armSize,
+    armAttachedTextures: [[armRightImage, armOffsetInfo]],
+    headAttachedTextures: [[headRightImage, [-3, 10, 0.28 * 179, 0.28 * 241]]],
+    bodyAttachedTextures: [
+      [bodyRightImage, [-5, 10, 0.45 * 127, 0.45 * 394]],
+      [shoeTexture, [-5.5, 72.5, 0.1 * 480, 0.1 * 420]],
+      [topTexture, [0.2, -41, 0.095 * 360, 0.095 * 660]],
+      [pantsTexture, [0.2, 10, 0.095 *3 * 120, 0.095*3 * 140]],
+    ],
   })
 }
 
@@ -324,6 +406,7 @@ function startGame(first = false) {
   // Modifiers
 
   let ballKind = "normal"
+  let armSize = "normal"
 
   let modifiers
 
@@ -337,18 +420,23 @@ function startGame(first = false) {
 
   for (let index in modifiers) {
     let modifer = modifiers[index]
-    if ((index == modifiers.length - 1)) {
+    if (index == modifiers.length - 1) {
       message += modifer
     } else {
       message = message + modifer + " + "
     }
 
-    if (modifer === "double") {
+    if (modifer === "DOUBLE POINT") {
       ballKind = "double"
-    } else if (modifer === "heavy") {
+    } else if (modifer === "HEAVY BALL") {
       ballKind = "heavy"
-    } else if (modifer === "light") {
+    } else if (modifer === "LIGHT BALL") {
       ballKind = "light"
+    }
+    if (modifer === "SHORT ARM") {
+      armSize = "short"
+    } else if (modifer === "LONG ARM") {
+      armSize = "long"
     }
   }
 
@@ -382,11 +470,14 @@ function startGame(first = false) {
   setTimeout(() => {
     spawnBall(0, 10, 1, 0.6, ballKind)
 
-    spawnPlayer("right", 8.1, 0, 4)
-    spawnPlayer("right", 3.5, 0, 3)
+    let outfitIndex1 = getRandomInt(2, 9)
+    let outfitIndex2 = getRandomInt(2, 9)
 
-    spawnPlayer("left", -8.1, 0, 1)
-    spawnPlayer("left", -3.5, 0, 2)
+    spawnPlayer("right", 8.1, 0, 4, armSize, outfitIndex1)
+    spawnPlayer("right", 3.5, 0, 3, armSize, outfitIndex1)
+
+    spawnPlayer("left", -8.1, 0, 1, armSize, outfitIndex2)
+    spawnPlayer("left", -3.5, 0, 2, armSize, outfitIndex2)
 
     for (let index in playerAllIds) {
       let id = playerAllIds[index]
