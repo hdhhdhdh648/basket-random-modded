@@ -55,7 +55,7 @@ function hideButtonsAndMenu() {
 }
 
 async function startGame(scriptName) {
-  const module = await import("../mods/" + scriptName)
+  const module = await import("./mods/" + scriptName)
   module.start()
 }
 

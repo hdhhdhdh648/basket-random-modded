@@ -1,5 +1,13 @@
 # Basket Random Modded
 
+## Preamble 
+
+The game can be played [here](https://hdhhdhdh648.github.io/basket-random-modded/)
+
+This documentation provides tools, references, and guidelines to help developers create game modes for Basket Random Modded.
+
+Basket Random Modded is a remake of Basket Random to allow for seamless modding and custom community game modes. It runs on any internet browser, allowing it to run on all platforms. All scripts are written JS, physical elements of game are rendered using canvas and other are in HTML and CSS.
+
 ## GameEngine Communication
 
 This section explains the functions used to send and receive data between your mod and the game engine.
