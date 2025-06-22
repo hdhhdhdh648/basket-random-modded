@@ -7,6 +7,10 @@ export function endGame() {
   showAllButtons()
 }
 
+export function modTesting() {
+  console.info("Mod works!")
+}
+
 let menuCoverColor = "rgb(18, 10, 105)"
 
 let menuCover = document.querySelector("#menu-cover")

@@ -2,7 +2,7 @@
 
 ## Preamble 
 
-The game can be played [here](https://hdhhdhdh648.github.io/basket-random-modded/)
+The game can be played [here](https://hdhhdhdh648.github.io/basket-random-modded/).
 
 This documentation provides tools, references, and guidelines to help developers create game modes for Basket Random Modded.
 
