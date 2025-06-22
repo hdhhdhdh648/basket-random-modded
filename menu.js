@@ -11,6 +11,8 @@ export function modTesting() {
   console.info("Mod works!")
 }
 
+window.modTesting = modTesting
+
 let menuCoverColor = "rgb(18, 10, 105)"
 
 let menuCover = document.querySelector("#menu-cover")
