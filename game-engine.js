@@ -78,6 +78,19 @@ const pl = planck
 const Vec2 = pl.Vec2
 const world = new pl.World(Vec2(0, -15))
 
+function updateProperty(property, value) {
+  // GameEngine.emit("updateProperty", { property: property, value: value })
+  window.postMessage(
+    {
+      source: "basket-PvP-normal-mod",
+      action: "propertyChange",
+      property: property,
+      value:value,
+    },
+    "*"
+  )
+}
+
 // Media
 
 let headRightImage = new Image()
@@ -182,6 +195,12 @@ GameEngine.on(
   }
 )
 
+function getImage(source) {
+  let image = new Image()
+  image.src = source
+  return image
+}
+
 GameEngine.on(
   "spawnBall",
   ({ x, y, id, size, frameList, bounciness, density }) => {
@@ -231,6 +250,7 @@ GameEngine.on("playerPickingUpDisabled", ({ ids, value }) => {
 GameEngine.on(
   "throwBall",
   ({ ids, targetPosition, targetXOffset, throttle }) => {
+    // console.log(ids)
     for (let id of ids) {
       if (playerIsPickedUpBall[id] === true) {
         throwBall(
@@ -434,8 +454,6 @@ function spawnBall(
   bounciness = 0.6,
   density = 0.01
 ) {
-  console.log(frameList)
-
   const ball = world.createDynamicBody(Vec2(x, y + RAISE))
   ball.createFixture(pl.Circle(size), {
     density: density,
@@ -634,14 +652,6 @@ function spawnPlayer(
   armAttachedTextures,
   headAttachedTextures,
   bodyAttachedTextures
-  // armTexture,
-  // armTextureOffset = [0,0,0,0],
-  // headTexture,
-  // headTextureOffset = [0,0,0,0],
-  // bodyTexture,
-  // bodyTextureOffset = [0,0,0,0],
-  // attachedTextures = [],
-  // reach = 1.8
 ) {
   playerTeam[id] = team
 
@@ -655,10 +665,14 @@ function spawnPlayer(
 
   playerBallReach[id] = reach
 
-  textureList[id] = [armAttachedTextures, headAttachedTextures, bodyAttachedTextures]
+  textureList[id] = [
+    armAttachedTextures,
+    headAttachedTextures,
+    bodyAttachedTextures,
+  ]
 
   // Feet
-  const feet = world.createDynamicBody(Vec2(x, 1.4 + RAISE - 0.9))
+  const feet = world.createDynamicBody(Vec2(x, 1.4 + RAISE - 0.9 + y))
   feet.createFixture(pl.Circle(0.5), {
     density: 1,
     friction: 2,
@@ -667,7 +681,7 @@ function spawnPlayer(
   })
   playerFeetList[id] = feet
   // Body
-  const body = world.createDynamicBody(Vec2(x, 2.8 + RAISE - 0.9))
+  const body = world.createDynamicBody(Vec2(x, 2.8 + RAISE - 0.9 + y))
   body.createFixture(pl.Box(0.4, 1.6), {
     density: 1,
     friction: 0.3,
@@ -684,7 +698,9 @@ function spawnPlayer(
   //   isSensor: true
   // })
   // Head
-  const head = world.createDynamicBody(Vec2(x - 0.15 * side, 4.9 + RAISE - 0.9))
+  const head = world.createDynamicBody(
+    Vec2(x - 0.15 * side, 4.9 + RAISE - 0.9 + y)
+  )
   head.createFixture(pl.Box(0.35, 0.4), {
     density: 0.2,
     friction: 0.3,
@@ -694,7 +710,7 @@ function spawnPlayer(
   })
   // Head hitbox
   const headHitbox = world.createDynamicBody(
-    Vec2(x - 0.15 * side, 4.9 + RAISE - 0.9)
+    Vec2(x - 0.15 * side, 4.9 + RAISE - 0.9 + y)
   )
   headHitbox.createFixture(pl.Box(0.35, 0.5), {
     density: 0.2,
@@ -712,7 +728,7 @@ function spawnPlayer(
     armSize = 1.45
   }
   const arm = world.createDynamicBody(
-    Vec2(x + 0.4 * side, 3.45 - armSize + RAISE)
+    Vec2(x + 0.4 * side, 3.45 - armSize + RAISE + y)
   )
   arm.createFixture(pl.Box(0.3, armSize), {
     density: 0.02,
@@ -721,7 +737,7 @@ function spawnPlayer(
   })
   // Hand
   const hand = world.createDynamicBody(
-    Vec2(x + 0.4 * side, 3.9 - (armSize * 3) / 2 + RAISE - 0.9)
+    Vec2(x + 0.4 * side, 3.9 - (armSize * 3) / 2 + RAISE - 0.9 + y)
   )
   hand.createFixture(pl.Box(0.2, 0.2), {
     density: 0.01,
@@ -745,7 +761,7 @@ function spawnPlayer(
       },
       body,
       feet,
-      Vec2(x, 10 + RAISE - 0.9)
+      Vec2(x, 10 + RAISE + y - 0.9)
     )
   )
 
@@ -759,7 +775,7 @@ function spawnPlayer(
       },
       body,
       headHitbox,
-      Vec2(x, 10 + RAISE - 0.9)
+      Vec2(x, 10 + RAISE + y - 0.9)
     )
   )
 
@@ -775,7 +791,7 @@ function spawnPlayer(
       },
       head,
       body,
-      Vec2(x - 0.1 * side, 4.4 + RAISE - 0.9)
+      Vec2(x - 0.1 * side, 4.4 + RAISE + y - 0.9)
     )
   )
 
@@ -789,7 +805,7 @@ function spawnPlayer(
       },
       arm,
       body,
-      Vec2(x + 0.4 * side, 4.2 + RAISE - 0.9)
+      Vec2(x + 0.4 * side, 4.2 + RAISE + y - 0.9)
     )
   )
 
@@ -803,7 +819,7 @@ function spawnPlayer(
       },
       arm,
       hand,
-      Vec2(x + 0.4 * side, 4.2 + RAISE - 0.9)
+      Vec2(x + 0.4 * side, 4.2 + RAISE + y - 0.9)
     )
   )
 
@@ -834,11 +850,11 @@ function renderImage(image, flip, body, xOffset, yOffset, xScale, yScale) {
   const pos = body.getPosition()
   const angle = body.getAngle()
   const canvasPos = toCanvas(pos)
-  
+
   ctx.save()
   ctx.translate(canvasPos.x, canvasPos.y)
   ctx.rotate(-angle)
-  
+
   if (flip === true) {
     ctx.scale(-1, 1)
   }
@@ -849,13 +865,14 @@ function renderImage(image, flip, body, xOffset, yOffset, xScale, yScale) {
     -yScale / 2 + yOffset,
     xScale,
     yScale
-  );
+  )
 
   ctx.restore()
 }
 
 function renderHead(id) {
-  let [armAttachedTextures, headAttachedTextures, bodyAttachedTextures] = textureList[id]
+  let [armAttachedTextures, headAttachedTextures, bodyAttachedTextures] =
+    textureList[id]
   let [feet, body, head, arm] = playerList[id]
 
   let flip = false
@@ -867,14 +884,15 @@ function renderHead(id) {
 
   for (let index in headAttachedTextures) {
     let textureInfo = headAttachedTextures[index]
-    console.log(textureInfo)
     let [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
-    renderImage(image,flip,head, xOffset, yOffset, xScale, yScale)
+
+    renderImage(image, flip, head, xOffset, yOffset, xScale, yScale)
   }
 }
 
 function renderBody(id) {
-  let [armAttachedTextures, headAttachedTextures, bodyAttachedTextures] = textureList[id]
+  let [armAttachedTextures, headAttachedTextures, bodyAttachedTextures] =
+    textureList[id]
   let [feet, body, head, arm] = playerList[id]
 
   let flip = false
@@ -887,12 +905,14 @@ function renderBody(id) {
   for (let index in bodyAttachedTextures) {
     let textureInfo = bodyAttachedTextures[index]
     let [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
-    renderImage(image,flip,body, xOffset, yOffset, xScale, yScale)
+
+    renderImage(image, flip, body, xOffset, yOffset, xScale, yScale)
   }
 }
 
 function renderArm(id) {
-  let [armAttachedTextures, headAttachedTextures, bodyAttachedTextures] = textureList[id]
+  let [armAttachedTextures, headAttachedTextures, bodyAttachedTextures] =
+    textureList[id]
   let [feet, body, head, arm] = playerList[id]
 
   let flip = false
@@ -905,7 +925,8 @@ function renderArm(id) {
   for (let index in armAttachedTextures) {
     let textureInfo = armAttachedTextures[index]
     let [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
-    renderImage(image,flip,arm, xOffset, yOffset, xScale, yScale)
+
+    renderImage(image, flip, arm, xOffset, yOffset, xScale, yScale)
   }
 }
 
@@ -1347,8 +1368,6 @@ function renderShadows() {
     let positionX = ball.getPosition().x
     let positionY = ball.getPosition().y
 
-    // console.log(Math.min(5, (positionY - RAISE - 0.5)))
-
     let size = 0.6 - 0.07 * Math.min(5, positionY - RAISE - 0.5)
     renderShadow(positionX, RAISE + 0.1, size, 0.15)
   }
@@ -1498,6 +1517,18 @@ function simulate() {
   }
 }
 
+function updateProperties() {
+  let playerAngleList = {}
+  for (let playerId in playerList) {
+    playerAngleList[playerId] = getPlayerAngle(playerId)
+  }
+
+  updateProperty("playerAngleList", playerAngleList)
+  updateProperty("ballIsPickedUpList", ballIsPickedUp)
+  updateProperty("ballPickedUpPlayerList", ballPickedUpPlayer)
+  updateProperty("playerPickedUpBallList", playerPickedUpBall)
+}
+
 function step() {
   world.step(SIMULATION_SPEED)
 
@@ -1507,6 +1538,8 @@ function step() {
 
   render()
   requestAnimationFrame(step)
+
+  updateProperties()
 }
 
 // UNSORTED
@@ -1630,15 +1663,11 @@ function ballHandler() {
           (handPosition.y - ballPosition.y) ** 2
       )
 
-      // console.log(distance, ballIsPickedUp, isPlayerPickingUpDisabled)
-
       if (
         distance < playerBallReach[playerId] &&
         ballIsPickedUp[ballId] !== true &&
         isPlayerPickingUpDisabled[playerId] !== true
       ) {
-        console.log("pick up")
-
         ballIsPickedUp[ballId] = true
         ballPickedUpPlayer[ballId] = playerId
         playerIsPickedUpBall[playerId] = true
@@ -1823,3 +1852,65 @@ function testingGetBodyCount() {
 }
 
 step()
+
+// window.addEventListener("message", (event) => {
+//   const message = event.data
+//   const source = message.source
+//   const action = message.action
+//   if (action === "engine/spawn-player") {
+//     spawnPlayer(
+//       message.side,
+//       message.x,
+//       message.y,
+//       message.id,
+//       message.team,
+//       message.reach,
+//       message.armSize,
+//       message.armWidth,
+//       message.armAttachedTextures,
+//       message.headAttachedTextures,
+//       message.bodyAttachedTextures
+//     )
+//   } else if (action === "engine/spawn-player") {
+//     //
+//   } else if (action === "engine/spawn-player") {
+//     //
+//   } else if (action === "engine/spawn-player") {
+//     //
+//   } else if (action === "engine/spawn-player") {
+//     //
+//   } else if (action === "engine/spawn-player") {
+//     //
+//   }
+// })
+
+// export function engine(event) {
+//   const message = event.data
+//   const source = message.source
+//   const action = message.action
+//   if (action === "engine/spawn-player") {
+//     spawnPlayer(
+//       message.side,
+//       message.x,
+//       message.y,
+//       message.id,
+//       message.team,
+//       message.reach,
+//       message.armSize,
+//       message.armWidth,
+//       message.armAttachedTextures,
+//       message.headAttachedTextures,
+//       message.bodyAttachedTextures
+//     )
+//   } else if (action === "engine/spawn-player") {
+//     //
+//   } else if (action === "engine/spawn-player") {
+//     //
+//   } else if (action === "engine/spawn-player") {
+//     //
+//   } else if (action === "engine/spawn-player") {
+//     //
+//   } else if (action === "engine/spawn-player") {
+//     //
+//   }
+// }
