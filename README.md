@@ -1,4 +1,6 @@
-# Basket Random Modded
+# Basket Random Modded 
+
+# **GAME DYSFUNCTIONAL AS OF NOW, DOCUMENTATION OUTDATED**
 
 ## Preamble 
 
