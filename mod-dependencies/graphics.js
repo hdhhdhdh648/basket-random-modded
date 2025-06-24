@@ -171,7 +171,9 @@ let currentMap = null
 export function changeMap(map) {
   currentMap = map
   clearMap()
-  setMap()
+  if (map){
+setMap()
+  }
 }
 
 window.onresize = function () {
@@ -278,6 +280,8 @@ export function updateScore(side, score, animation = true, duration = 2000) {
   }, duration)
 }
 
+let scoreBoards = []
+
 export function displayScoreBoards(
   value,
   scoreLeft = "0",
@@ -330,6 +334,14 @@ export function displayScoreBoards(
 
     changeScore("left", scoreRight)
     changeScore("right", scoreLeft)
+
+    scoreBoards.push(scoreBoardLeft, scoreBoardRight)
+  } else if (value === false) {
+    for (let board of scoreBoards) {
+      board.remove()
+      scoreLeftDisplay = null
+      scoreRightDisplay = null
+    }
   }
 }
 

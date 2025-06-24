@@ -301,12 +301,15 @@ function changeProperty(property, value) {
   } else if (property === "gravity") {
   } else if (property === "speed") {
     SIMULATION_SPEED = value
+
+    changeBallInterval(1/SIMULATION_SPEED /60*100)
   } else if (property === "score") {
     score = value
   }
 }
 
-setInterval(() => {
+function ballChangeFrame() {
+// setInterval(() => {
   for (let ballId in ballList) {
     if (!ballList[ballId]) {
       return
@@ -323,7 +326,23 @@ setInterval(() => {
       ballFrameIndex[ballId] = nextIndex
     }
   }
-}, 100)
+// }, 100)
+}
+
+let ballIntervalId;
+let currentBallInterval = 100
+
+function startBallInterval() {
+  clearInterval(ballIntervalId)
+  ballIntervalId = setInterval(ballChangeFrame, currentBallInterval);
+}
+
+function changeBallInterval(newInterval) {
+  currentBallInterval = newInterval;
+  startBallInterval();
+}
+
+startBallInterval()
 
 let bodiesToDestroy = []
 let jointsToDestroy = []
@@ -1425,7 +1444,15 @@ function scoreLeftHandler() {
     score === false
   ) {
     score = true
-    GameEngine.emit("score", { side: "left" })
+    window.postMessage(
+    {
+      source: "game-engine",
+      action: "score",
+      side: "left"
+    },
+    "*"
+  )
+    // GameEngine.emit("score", { side: "left" })
     // SIMULATION_SPEED = 1/300
   }
 }
@@ -1454,7 +1481,15 @@ function scoreRightHandler() {
     score === false
   ) {
     score = true
-    GameEngine.emit("score", { side: "right" })
+    window.postMessage(
+    {
+      source: "game-engine",
+      action: "score",
+      side: "right"
+    },
+    "*"
+  )
+    // GameEngine.emit("score", { side: "right" })
     // SIMULATION_SPEED = 1/300
   }
 }
@@ -1765,6 +1800,7 @@ function getPlayerAngle(id) {
 }
 
 function rotatePlayer(ids, rotation) {
+  console.log(ids)
   for (let index in ids) {
     let id = ids[index]
     let [feet, body, head, arm, hand] = playerList[id]
@@ -1838,7 +1874,15 @@ world.on("begin-contact", (contact) => {
     }, 200)
   } else if (isFeet && isGround && playerAirborne[feetPlayerId] === true) {
     playerAirborne[feetPlayerId] = false
-    GameEngine.emit("playerLand", { playerId: feetPlayerId })
+    window.postMessage(
+    {
+      source: "game-engine",
+      action: "playerLand",
+      playerId: feetPlayerId
+    },
+    "*"
+  )
+    // GameEngine.emit("playerLand", { playerId: feetPlayerId })
   }
 })
 

@@ -6,6 +6,10 @@ import {
   displayMessage,
   displayScoreBoards,
   changeMap,
+  basketAnimation,
+  updateScore,
+  fadeOut,
+  fadeIn,
 } from "./mod-dependencies/graphics.js"
 
 // import { start2_2PvP } from "./mods/2-2PvP.js"
@@ -261,12 +265,29 @@ function engineRotatePlayer(ids, value) {
   })
 }
 
+function killAllPlayers() {
+GameEngine.emit("killAllPlayers", {})
+}
+
+function killAllBalls() {
+GameEngine.emit("killAllBalls", {})
+}
+
+function endGame() {
+  killAllBalls()
+  killAllPlayers()
+  changeMap()
+  displayScoreBoards(false)
+}
+
 window.addEventListener("message", (event) => {
   const data = event.data
   const source = data.source
   const action = data.action
   if (action === "add-button") {
     addModButton(source, data.image)
+  } else if (action === "end-game") {
+    endGame()
   } else if (action === "engine/spawnPlayer") {
     engineSpawnPlayer(data)
   } else if (action === "engine/startJump") {
@@ -281,6 +302,10 @@ window.addEventListener("message", (event) => {
     engineRaiseArm(data.ids, data.value)
   } else if (action === "engine/rotateBall") {
     engineRotateBall(data.id, data.value)
+  }  else if (action === "engine/killAllBalls") {
+    killAllBalls()
+  }else if (action === "engine/killAllPlayers") {
+    killAllPlayers()
   } else if (action === "engine/throwBall") {
     engineThrowBall(
       data.ids,
@@ -304,5 +329,13 @@ window.addEventListener("message", (event) => {
     displayScoreBoards(data.value)
   } else if (action === "graphics/changeMap") {
     changeMap(data.map)
+  } else if (action === "graphics/basketAnimation") {
+    basketAnimation(data.image)
+  } else if (action === "graphics/updateScore") {
+    updateScore(data.side, data.score)
+  } else if (action === "graphics/fadeIn") {
+    fadeIn()
+  } else if (action === "graphics/fadeOut") {
+    fadeOut()
   }
 })
