@@ -82,7 +82,7 @@ function updateProperty(property, value) {
   // GameEngine.emit("updateProperty", { property: property, value: value })
   window.postMessage(
     {
-      source: "basket-PvP-normal-mod",
+      source: "game-engine",
       action: "propertyChange",
       property: property,
       value:value,
@@ -161,6 +161,7 @@ GameEngine.on(
     reach,
     armSize,
     armWidth,
+    feetFriction,
     armAttachedTextures,
     headAttachedTextures,
     bodyAttachedTextures,
@@ -181,6 +182,7 @@ GameEngine.on(
       reach,
       armSize,
       armWidth,
+      feetFriction,
       armAttachedTextures,
       headAttachedTextures,
       bodyAttachedTextures
@@ -302,6 +304,8 @@ function changeProperty(property, value) {
   } else if (property === "speed") {
     SIMULATION_SPEED = value
 
+    if (SIMULATION_SPEED === 0) {ballAnimationDisabled = true} else {ballAnimationDisabled = false}
+
     changeBallInterval(1/SIMULATION_SPEED /60*100)
   } else if (property === "score") {
     score = value
@@ -309,6 +313,7 @@ function changeProperty(property, value) {
 }
 
 function ballChangeFrame() {
+  if (ballAnimationDisabled === true) return
 // setInterval(() => {
   for (let ballId in ballList) {
     if (!ballList[ballId]) {
@@ -328,6 +333,8 @@ function ballChangeFrame() {
   }
 // }, 100)
 }
+
+let ballAnimationDisabled = false
 
 let ballIntervalId;
 let currentBallInterval = 100
@@ -668,6 +675,7 @@ function spawnPlayer(
   reach = 1.8,
   armSize = 1.2,
   armWidth = 0.3,
+  feetFriction = 2,
   armAttachedTextures,
   headAttachedTextures,
   bodyAttachedTextures
@@ -691,10 +699,14 @@ function spawnPlayer(
   ]
 
   // Feet
+
+  // console.log(feetFriction)
+
   const feet = world.createDynamicBody(Vec2(x, 1.4 + RAISE - 0.9 + y))
   feet.createFixture(pl.Circle(0.5), {
     density: 1,
-    friction: 2,
+    friction: feetFriction,
+    // friction: 0.1,
     filterCategoryBits: 0x0002,
     filterMaskBits: 0x0001,
   })
@@ -894,6 +906,9 @@ function renderHead(id) {
     textureList[id]
   let [feet, body, head, arm] = playerList[id]
 
+  // renderBox(head)
+  // return
+
   let flip = false
   if (playerSideList[id] === "flip") {
     flip = true
@@ -913,6 +928,10 @@ function renderBody(id) {
   let [armAttachedTextures, headAttachedTextures, bodyAttachedTextures] =
     textureList[id]
   let [feet, body, head, arm] = playerList[id]
+
+  // renderBox(body)
+  // // renderBox(feet)
+  // return
 
   let flip = false
   if (playerSideList[id] === "flip") {

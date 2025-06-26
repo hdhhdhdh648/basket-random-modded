@@ -51,10 +51,8 @@ function setMapCity(
 
   const fence = document.createElement("div")
   fence.style.width = "100%"
-  // fence.style.height = "17%"
   fence.style.height = canvasHeight * 0.185 + "px"
   fence.style.position = "absolute"
-  // fence.style.bottom = "0"
   fence.style.zIndex = 2
 
   fence.style.zIndex = 1
@@ -120,14 +118,125 @@ function setMapCity(
   clouds.style.bottom =
     (bodyHeight - canvasHeight) / 2 + canvasHeight * 0.5 + "px"
 
+  const markings = document.createElement("div")
+  markings.style.width = "100vw"
+  markings.style.height = "20vw"
+  markings.style.position = "absolute"
+  markings.style.zIndex = 1
+
+  markings.style.backgroundImage = 'url("' + "media/markings.png" + '")'
+  markings.style.backgroundSize = "70% 70%"
+  markings.style.backgroundRepeat = "no-repeat"
+
+  markings.style.bottom =
+    (bodyHeight - canvasHeight) / 2 + canvasHeight * 0.04 + "px"
+  markings.style.backgroundPosition = "center"
+
   mapContainer.appendChild(floor)
   mapContainer.appendChild(bushes)
   mapContainer.appendChild(fence)
   mapContainer.appendChild(city)
   mapContainer.appendChild(clouds)
   mapContainer.appendChild(border)
+  mapContainer.appendChild(markings)
 
   mapContainer.style.backgroundColor = skyColor
+}
+
+function setMapSnow() {
+  const canvasHeight = canvasContainer.getBoundingClientRect().height
+  const bodyHeight = document.body.getBoundingClientRect().height
+
+  const ground = document.createElement("div")
+  ground.style.height =
+    (bodyHeight - canvasHeight) / 2 + canvasHeight * 0.42 + "px"
+  ground.style.width = "100%"
+  ground.style.position = "absolute"
+  ground.style.bottom = "0"
+  ground.style.zIndex = 1
+
+  ground.style.backgroundColor = "#FFFFFF"
+
+  const border = document.createElement("div")
+  border.style.width = "100%"
+  border.style.height = (canvasHeight * 1) / 200 + "px"
+  border.style.position = "absolute"
+  border.style.zIndex = 3
+  border.style.backgroundColor = "#E6E6E6"
+  border.style.bottom =
+    (bodyHeight - canvasHeight) / 2 + canvasHeight * 0.42 + "px"
+
+  const bushes = document.createElement("div")
+  bushes.style.width = "100%"
+  bushes.style.height = canvasHeight * 0.09 + "px"
+  bushes.style.position = "absolute"
+  bushes.style.zIndex = 2
+
+  bushes.style.zIndex = 2
+
+  bushes.style.backgroundImage =
+    'url("' + "media/bushes-texture-snow.png" + '")'
+  bushes.style.backgroundRepeat = "repeat"
+  bushes.style.backgroundSize = "auto 100%"
+  bushes.style.backgroundPosition = "center"
+
+  bushes.style.bottom =
+    (bodyHeight - canvasHeight) / 2 + canvasHeight * 0.42 + "px"
+
+  const fence = document.createElement("div")
+  fence.style.width = "100%"
+  fence.style.height = canvasHeight * 0.185 + "px"
+  fence.style.position = "absolute"
+  fence.style.zIndex = 2
+
+  fence.style.zIndex = 1
+
+  fence.style.backgroundImage = 'url("' + "media/fence-texture.png" + '")'
+  fence.style.backgroundRepeat = "repeat"
+  fence.style.backgroundSize = "auto 100%"
+  fence.style.backgroundPosition = "center"
+
+  fence.style.bottom =
+    (bodyHeight - canvasHeight) / 2 + canvasHeight * 0.42 + "px"
+
+  const background = document.createElement("div")
+  background.style.width = "100%"
+  background.style.height = canvasHeight * 0.45 + "px"
+  background.style.position = "absolute"
+  background.style.zIndex = 0
+
+  background.style.backgroundImage =
+    'url("' + "media/snow-background.png" + '")'
+  background.style.backgroundRepeat = "repeat"
+  background.style.backgroundSize = "95%"
+
+  background.style.bottom =
+    (bodyHeight - canvasHeight) / 2 + canvasHeight * 0.58 + "px"
+  background.style.backgroundSize = "auto 100%"
+  background.style.backgroundPosition = "center"
+
+  const markings = document.createElement("div")
+  markings.style.width = "100vw"
+  markings.style.height = "20vw"
+  markings.style.position = "absolute"
+  markings.style.zIndex = 1
+
+  markings.style.backgroundImage = 'url("' + "media/markings-snow.png" + '")'
+  markings.style.backgroundSize = "70% 70%"
+  markings.style.backgroundRepeat = "no-repeat"
+
+  markings.style.bottom =
+    (bodyHeight - canvasHeight) / 2 + canvasHeight * 0.04 + "px"
+  markings.style.backgroundPosition = "center"
+
+  mapContainer.appendChild(ground)
+  mapContainer.appendChild(border)
+  mapContainer.appendChild(bushes)
+  mapContainer.appendChild(fence)
+  mapContainer.appendChild(background)
+  mapContainer.appendChild(markings)
+
+  mapContainer.style.backgroundColor = "#E5E5E5"
 }
 
 function setMap() {
@@ -158,11 +267,12 @@ function setMap() {
       "media/clouds-texture-3.png",
       "#5959C6"
     )
+  } else if (currentMap === "snow") {
+    setMapSnow()
   }
 }
 
 function clearMap() {
-  console.log("clear")
   mapContainer.innerHTML = ""
 }
 
@@ -171,8 +281,8 @@ let currentMap = null
 export function changeMap(map) {
   currentMap = map
   clearMap()
-  if (map){
-setMap()
+  if (map) {
+    setMap()
   }
 }
 
@@ -355,6 +465,7 @@ const fadeStyles = {
   backgroundColor: "#000000",
   transition: "all 200ms",
   opacity: 0,
+  pointerEvents: "none",
 }
 
 Object.assign(fade.style, fadeStyles)
@@ -362,7 +473,7 @@ Object.assign(fade.style, fadeStyles)
 document.body.appendChild(fade)
 
 export function fadeOut() {
-  console.log("fading out")
+  // console.log("fading out")
   fade.style.opacity = 1
 }
 
@@ -381,7 +492,8 @@ export function displayMessage(message) {
   container.style.top = "2vw"
   container.style.width = "80vw"
   container.style.height = "3vw"
-  container.style.transition = "top 300ms cubic-bezier(0.42, -0.37, 0.71, 0.25);"
+  container.style.transition =
+    "top 300ms cubic-bezier(0.42, -0.37, 0.71, 0.25);"
 
   document.body.appendChild(container)
 
@@ -389,16 +501,155 @@ export function displayMessage(message) {
     let character = message[index]
     let image = document.createElement("img")
     image.src = "font/" + character + ".png"
-    image.style.height = 100%
-
-    container.appendChild(image)
+    image.style.height = 100 % container.appendChild(image)
   }
 
   setTimeout(() => {
     container.style.top = "-5vw"
-  }, 1000);
+  }, 1000)
 
   setTimeout(() => {
     container.remove()
-  }, 1500);
+  }, 1500)
+}
+
+// Pause menu
+
+let pauseButtonEnabled = false
+let pauseMenuVisible = false
+
+const overlay = document.createElement("div")
+
+const overlayStyles = {
+  height: "100%",
+  width: "100%",
+  position: "absolute",
+  zIndex: 112,
+  backgroundColor: "rgba(0, 0, 0, 0)",
+  // opacity: 0,
+  pointerEvents: "none",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: "10vw"
+}
+
+Object.assign(overlay.style, overlayStyles)
+
+const pauseMenuButtonStyles = {
+  height: "10vw",
+  width: "10vw",
+  opacity: 0,
+  zIndex: 2000,
+}
+
+let resumeButton = document.createElement("img")
+resumeButton.src = "media/play-button.png"
+resumeButton.classList.add("image")
+Object.assign(resumeButton.style, pauseMenuButtonStyles)
+let menuButton = document.createElement("img")
+menuButton.src = "media/menu-button.png"
+menuButton.classList.add("image")
+Object.assign(menuButton.style, pauseMenuButtonStyles)
+
+overlay.appendChild(resumeButton)
+overlay.appendChild(menuButton)
+
+document.body.appendChild(overlay)
+
+let pauseButton = document.createElement("img")
+pauseButton.src = "media/pause-button.png"
+pauseButton.style.width = "4vw"
+pauseButton.style.height = "4vw"
+pauseButton.style.position = "absolute"
+pauseButton.style.top = "2vw"
+pauseButton.style.right = "2vw"
+pauseButton.style.zIndex = 111
+
+pauseButton.classList.add("image")
+
+document.body.appendChild(pauseButton)
+
+pauseButton.style.opacity = 0
+
+pauseButton.onclick = togglePauseMenu
+// pauseButton.addEventListener("click", togglePauseMenu)
+
+resumeButton.onclick = resumeGame
+menuButton.onclick = endGame
+
+function resumeGame() {
+  console.log(pauseMenuVisible)
+  if (pauseMenuVisible === false) return
+  console.log(2)
+
+  togglePauseMenu()
+
+  window.postMessage(
+      {
+        source: "graphics",
+        action: "resume",
+      },
+      "*"
+    )
+}
+
+function endGame() {
+  if (pauseMenuVisible === false) return
+
+  window.postMessage(
+      {
+        source: "graphics",
+        action: "terminate",
+      },
+      "*"
+    )
+
+    setTimeout(() => {
+      overlay.style.pointerEvents = "none"
+    overlay.style.backgroundColor = "rgba(0, 0, 0, 0)"
+    resumeButton.style.opacity = 0
+    menuButton.style.opacity = 0
+    pauseMenuVisible =false
+      // togglePauseMenu()
+    }, 300);
+}
+
+let pauseHidden = true
+
+function togglePauseMenu() {
+  if (pauseHidden === true) return
+
+  if (pauseMenuVisible === false) {
+    overlay.style.backgroundColor = "rgba(0, 0, 0, 0.7)"
+    overlay.style.pointerEvents = "all"
+    resumeButton.style.opacity = 1
+    menuButton.style.opacity = 1
+
+    window.postMessage(
+      {
+        source: "graphics",
+        action: "pause",
+      },
+      "*"
+    )
+  } else {
+     overlay.style.pointerEvents = "none"
+    overlay.style.backgroundColor = "rgba(0, 0, 0, 0)"
+    resumeButton.style.opacity = 0
+    menuButton.style.opacity = 0
+  }
+
+  pauseButtonEnabled = !pauseButtonEnabled
+  pauseMenuVisible = !pauseMenuVisible
+}
+
+export function togglePause(value) {
+  if (value === true) {
+    pauseButton.style.opacity = 1
+    pauseHidden = false
+  } else {
+    pauseButton.style.opacity = 0
+    pauseHidden = true
+  }
 }

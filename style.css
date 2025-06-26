@@ -55,6 +55,7 @@ canvas {
     height: 150px;
     aspect-ratio: 1/1;
     position: relative;
+    z-index: 1000;
 }
 
 /* @keyframes basketAnimation {
@@ -76,6 +77,8 @@ canvas {
     height: 100%;
     width: 100%;
     position: fixed;
+    z-index: 20;
+    pointer-events: none;
 }
 
 @keyframes basketAnimation {
@@ -115,4 +118,13 @@ canvas {
     transform: translateX(100vw) rotate(0deg); 
     width: 25%
   }
+}
+
+/* Disable drag and select */
+.image {
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
