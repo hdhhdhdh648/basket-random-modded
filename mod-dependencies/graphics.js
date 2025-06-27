@@ -518,7 +518,7 @@ export function displayMessage(message) {
 let pauseButtonEnabled = false
 let pauseMenuVisible = false
 
-const overlay = document.createElement("div")
+const pauseOverlay = document.createElement("div")
 
 const overlayStyles = {
   height: "100%",
@@ -531,14 +531,15 @@ const overlayStyles = {
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  gap: "10vw"
+  gap: "10vw",
 }
 
-Object.assign(overlay.style, overlayStyles)
+Object.assign(pauseOverlay.style, overlayStyles)
 
-const pauseMenuButtonStyles = {
+const menuButtonStyles = {
   height: "10vw",
-  width: "10vw",
+  // width: "10vw",
+  aspectRatio: " 1/1",
   opacity: 0,
   zIndex: 2000,
 }
@@ -546,16 +547,16 @@ const pauseMenuButtonStyles = {
 let resumeButton = document.createElement("img")
 resumeButton.src = "media/play-button.png"
 resumeButton.classList.add("image")
-Object.assign(resumeButton.style, pauseMenuButtonStyles)
+Object.assign(resumeButton.style, menuButtonStyles)
 let menuButton = document.createElement("img")
 menuButton.src = "media/menu-button.png"
 menuButton.classList.add("image")
-Object.assign(menuButton.style, pauseMenuButtonStyles)
+Object.assign(menuButton.style, menuButtonStyles)
 
-overlay.appendChild(resumeButton)
-overlay.appendChild(menuButton)
+pauseOverlay.appendChild(resumeButton)
+pauseOverlay.appendChild(menuButton)
 
-document.body.appendChild(overlay)
+document.body.appendChild(pauseOverlay)
 
 let pauseButton = document.createElement("img")
 pauseButton.src = "media/pause-button.png"
@@ -586,33 +587,31 @@ function resumeGame() {
   togglePauseMenu()
 
   window.postMessage(
-      {
-        source: "graphics",
-        action: "resume",
-      },
-      "*"
-    )
+    {
+      source: "graphics",
+      action: "resume",
+    },
+    "*"
+  )
 }
 
 function endGame() {
-  if (pauseMenuVisible === false) return
-
   window.postMessage(
-      {
-        source: "graphics",
-        action: "terminate",
-      },
-      "*"
-    )
+    {
+      source: "graphics",
+      action: "terminate",
+    },
+    "*"
+  )
 
-    setTimeout(() => {
-      overlay.style.pointerEvents = "none"
-    overlay.style.backgroundColor = "rgba(0, 0, 0, 0)"
+  setTimeout(() => {
+    pauseOverlay.style.pointerEvents = "none"
+    pauseOverlay.style.backgroundColor = "rgba(0, 0, 0, 0)"
     resumeButton.style.opacity = 0
     menuButton.style.opacity = 0
-    pauseMenuVisible =false
-      // togglePauseMenu()
-    }, 300);
+    pauseMenuVisible = false
+    // togglePauseMenu()
+  }, 300)
 }
 
 let pauseHidden = true
@@ -621,8 +620,8 @@ function togglePauseMenu() {
   if (pauseHidden === true) return
 
   if (pauseMenuVisible === false) {
-    overlay.style.backgroundColor = "rgba(0, 0, 0, 0.7)"
-    overlay.style.pointerEvents = "all"
+    pauseOverlay.style.backgroundColor = "rgba(0, 0, 0, 0.7)"
+    pauseOverlay.style.pointerEvents = "all"
     resumeButton.style.opacity = 1
     menuButton.style.opacity = 1
 
@@ -634,8 +633,8 @@ function togglePauseMenu() {
       "*"
     )
   } else {
-     overlay.style.pointerEvents = "none"
-    overlay.style.backgroundColor = "rgba(0, 0, 0, 0)"
+    pauseOverlay.style.pointerEvents = "none"
+    pauseOverlay.style.backgroundColor = "rgba(0, 0, 0, 0)"
     resumeButton.style.opacity = 0
     menuButton.style.opacity = 0
   }
@@ -652,4 +651,95 @@ export function togglePause(value) {
     pauseButton.style.opacity = 0
     pauseHidden = true
   }
+}
+
+// Win menu
+
+const winOverlay = document.createElement("div")
+
+Object.assign(winOverlay.style, overlayStyles)
+
+let replayButton = document.createElement("img")
+replayButton.src = "media/replay-button.png"
+replayButton.classList.add("image")
+Object.assign(replayButton.style, menuButtonStyles)
+let exitButton = document.createElement("img")
+exitButton.src = "media/menu-button.png"
+exitButton.classList.add("image")
+Object.assign(exitButton.style, menuButtonStyles)
+
+winOverlay.appendChild(replayButton)
+winOverlay.appendChild(exitButton)
+
+exitButton.addEventListener("click", function(event) {
+    window.postMessage(
+    {
+      source: "graphics",
+      action: "end-game",
+      force: true
+    },
+    "*"
+  )
+
+  setTimeout(() => {
+    hideWinMenu()
+  }, 200);
+})
+
+replayButton.addEventListener("click", function(event) {
+    window.postMessage(
+    {
+      source: "graphics",
+      action: "replay",
+    },
+    "*"
+  )
+
+  setTimeout(() => {
+    hideWinMenu()
+  }, 0);
+})
+
+document.body.appendChild(winOverlay)
+
+function buttonHover(event) {
+  event.target.style.height = "12vw"
+}
+
+function buttonLeave(event) {
+  event.target.style.height = "10vw"
+}
+
+function animateButtonIn(button) {
+  button.style.height = "0vw"
+  setTimeout(() => {
+    button.style.transition = "all 200ms"
+  }, 50)
+  setTimeout(() => {
+    button.style.height = "10vw"
+  }, 100)
+  setTimeout(() => {
+    button.addEventListener("mouseenter", buttonHover)
+    button.addEventListener("mouseleave", buttonLeave)
+    button.style.transition = "none"
+  }, 300)
+}
+
+export function showWinMenu() {
+  winOverlay.style.backgroundColor = "rgba(0, 0, 0, 0.7)"
+  winOverlay.style.pointerEvents = "all"
+
+  animateButtonIn(replayButton)
+  animateButtonIn(exitButton)
+
+  replayButton.style.opacity = 1
+  exitButton.style.opacity = 1
+}
+
+function hideWinMenu() {
+  winOverlay.style.backgroundColor = "rgba(0, 0, 0, 0)"
+  winOverlay.style.pointerEvents = "none"
+
+  replayButton.style.opacity = 0
+  exitButton.style.opacity = 0
 }

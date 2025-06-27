@@ -11,6 +11,7 @@ import {
   fadeOut,
   fadeIn,
   togglePause,
+  showWinMenu,
 } from "./mod-dependencies/graphics.js"
 
 // import { start2_2PvP } from "./mods/2-2PvP.js"
@@ -231,16 +232,20 @@ function killAllBalls() {
   GameEngine.emit("killAllBalls", {})
 }
 
-function endGame() {
-  showMenu()
+function endGame(force = true) {
+  if (force === false) {
+    showWinMenu()
+  } else {
+    showMenu()
 
-  setTimeout(() => {
-    killAllBalls()
-    killAllPlayers()
-    changeMap()
-    displayScoreBoards(false)
-    togglePause(false)
-  }, 200)
+    setTimeout(() => {
+      killAllBalls()
+      killAllPlayers()
+      changeMap()
+      displayScoreBoards(false)
+      togglePause(false)
+    }, 200)
+  }
 }
 
 window.addEventListener("message", (event) => {
@@ -250,7 +255,8 @@ window.addEventListener("message", (event) => {
   if (action === "add-button") {
     addModButton(source, data.image)
   } else if (action === "end-game") {
-    endGame()
+    console.log(3)
+    endGame(data.force)
   } else if (action === "toggle-pause") {
     togglePause(data.value)
   } else if (action === "engine/spawnPlayer") {

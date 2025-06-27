@@ -459,6 +459,7 @@ function KillAllBalls() {
 
 function bodyDestroyHandler() {
   for (const body of bodiesToDestroy) {
+    // if (!body) return
     world.destroyBody(body)
   }
   bodiesToDestroy.length = 0
@@ -466,6 +467,7 @@ function bodyDestroyHandler() {
 
 function jointDestroyHandler() {
   for (const joint of jointsToDestroy) {
+    // if (!joint) return
     world.destroyJoint(joint)
   }
   jointsToDestroy.length = 0
