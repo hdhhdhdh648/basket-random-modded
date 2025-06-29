@@ -248,6 +248,15 @@ function endGame(force = true) {
   }
 }
 
+function engineSpawnHoop(side, distance, height, width) {
+  GameEngine.emit("spawnHoop", {
+    side: side,
+    distance: distance,
+    height: height,
+    width: width,
+  })
+}
+
 window.addEventListener("message", (event) => {
   const data = event.data
   const source = data.source
@@ -293,6 +302,13 @@ window.addEventListener("message", (event) => {
       data.frameList,
       data.bounciness,
       data.density
+    )
+  } else if (action === "engine/spawnHoop") {
+    engineSpawnHoop(
+      data.side,
+      data.distance,
+      data.height,
+      data.width
     )
   } else if (action === "graphics/displayMessage") {
     displayMessage(data.message)
