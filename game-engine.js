@@ -60,7 +60,7 @@ let SIMULATION_SPEED = 1 / 60
 
 const RAISE = 4.5
 
-const DEV_RENDER = true
+const DEV_RENDER = false
 
 let orders = {}
 
@@ -97,20 +97,52 @@ function updateProperty(property, value) {
 
 // Media
 
-let headRightImage = new Image()
-headRightImage.src = "media/head-right.png"
+// let headRightImage = new Image()
+// headRightImage.src = "media/head-right.png"
 
-let armRightNormalImage = new Image()
-armRightNormalImage.src = "media/arm-right-normal.png"
+// let armRightNormalImage = new Image()
+// armRightNormalImage.src = "media/arm-right-normal.png"
 
-let hoopLeftImage = new Image()
-hoopLeftImage.src = "media/hoop-left.png"
+function changeTexture(name, textureInfo) {
+  textureInfo = [getImage(textureInfo[0]), [textureInfo[1][0], textureInfo[1][1], textureInfo[1][2], textureInfo[1][3]]]
 
-let hoopLeftTopImage = new Image()
-hoopLeftTopImage.src = "media/hoop-left-top.png"
+  if (name === "hoopLeft") {
+    hoopLeftImageInfo = textureInfo
+  } else if (name === "hoopRight") {
+    hoopRightImageInfo = textureInfo
+  } else if (name === "hoopRight") {
+    hoopRightImageInfo = textureInfo
+  } else if (name === "hoopLeftTop") {
+    hoopLeftTopImageInfo = textureInfo
+  } else if (name === "hoopRightTop") {
+    hoopRightTopImageInfo = textureInfo
+  } else if (name === "hoopLeftBack") {
+    hoopLeftBackImageInfo = textureInfo
+  } else if (name === "hoopRightBack") {
+    hoopRightBackImageInfo = textureInfo
+  }
+}
 
-let hoopLeftBackImage = new Image()
-hoopLeftBackImage.src = "media/hoop-left-back.png"
+let hoopLeftImageInfo = [getImage("media/hoop-left.png"), [0, -4, 40, 368]]
+let hoopRightImageInfo = [getImage("media/hoop-left.png"), [0, -4, 40, 368]]
+
+let hoopLeftTopImageInfo = [
+  getImage("media/hoop-left-top.png"),
+  [70, -65, 270, 240],
+]
+let hoopRightTopImageInfo = [
+  getImage("media/hoop-left-top.png"),
+  [70, -65, 270, 240],
+]
+
+let hoopLeftBackImageInfo = [
+  getImage("media/hoop-left-back.png"),
+  [150.2, -2, 109.5, 34.5],
+]
+let hoopRightBackImageInfo = [
+  getImage("media/hoop-left-back.png"),
+  [150.2, -2, 109.5, 34.5],
+]
 
 let shadowImage = new Image()
 shadowImage.src = "media/shadow.png"
@@ -563,7 +595,6 @@ function destroyRightHoop() {
 }
 
 function spawnHoop(side, distance = 14.4, height = 0, width = 0) {
-
   let direction = 1
 
   if (side === "left") {
@@ -1051,6 +1082,8 @@ function pointArmRightDown(arm, targetAngle = 0, stiffness = 4, damping = 0.5) {
 // Render functions
 
 function renderImage(image, flip, body, xOffset, yOffset, xScale, yScale) {
+  if (!body) return
+
   const pos = body.getPosition()
   const angle = body.getAngle()
   const canvasPos = toCanvas(pos)
@@ -1325,32 +1358,40 @@ function hoopRightHandler() {
 // }
 
 function renderHoopLeft() {
-  renderBox(hoopLeft["1"])
+  if (DEV_RENDER === true) {
+    renderBox(hoopLeft["1"])
+  }
 
-  // const pos = hoopLeft["1"].getPosition()
-  // const angle = hoopLeft["1"].getAngle()
-  // const canvasPos = toCanvas(pos)
-
-  // ctx.save()
-  // ctx.translate(canvasPos.x, canvasPos.y)
-  // ctx.rotate(-angle)
-
-  // ctx.drawImage(
-  //   hoopLeftImage,
-  //   -SCALE / 2.5,
-  //   -SCALE * 3.78,
-  //   SCALE * 0.8,
-  //   SCALE * 0.8 * 9.21
-  // )
-
-  // ctx.restore()
+  renderImage(
+    hoopLeftImageInfo[0],
+    false,
+    hoopLeft["1"],
+    hoopLeftImageInfo[1][0],
+    hoopLeftImageInfo[1][1],
+    hoopLeftImageInfo[1][2],
+    hoopLeftImageInfo[1][3]
+  )
 }
 
 function renderHoopLeftTop() {
-  renderBox(hoopLeft["2"])
-  renderBox(hoopLeft["3"])
-  renderBox(hoopLeft["4"])
-  renderBox(hoopLeft["5"])
+  if (DEV_RENDER === true) {
+    renderBox(hoopLeft["2"])
+    renderBox(hoopLeft["3"])
+    renderBox(hoopLeft["4"])
+    renderBox(hoopLeft["5"])
+  }
+
+  renderImage(
+    hoopLeftTopImageInfo[0],
+    false,
+    hoopLeft["2"],
+    hoopLeftTopImageInfo[1][0],
+    hoopLeftTopImageInfo[1][1],
+    hoopLeftTopImageInfo[1][2],
+    hoopLeftTopImageInfo[1][3]
+  )
+
+  if (!hoopLeft["2"]) return
 
   // const pos = hoopLeft["2"].getPosition()
   // const angle = hoopLeft["2"].getAngle()
@@ -1361,7 +1402,7 @@ function renderHoopLeftTop() {
   // ctx.rotate(-angle)
 
   // ctx.drawImage(
-  //   hoopLeftTopImage,
+  //   hoopLeftTopImageInfo[0],
   //   -SCALE * 1.3,
   //   -SCALE * 3.77,
   //   SCALE * 4.8 * 1.12,
@@ -1372,7 +1413,21 @@ function renderHoopLeftTop() {
 }
 
 function renderHoopRight() {
-  renderBox(hoopRight["1"])
+  if (DEV_RENDER === true) {
+    renderBox(hoopRight["1"])
+  }
+
+  renderImage(
+    hoopRightImageInfo[0],
+    true,
+    hoopRight["1"],
+    hoopRightImageInfo[1][0],
+    hoopRightImageInfo[1][1],
+    hoopRightImageInfo[1][2],
+    hoopRightImageInfo[1][3]
+  )
+
+  // if (!hoopRight["1"]) return
 
   // const pos = hoopRight["1"].getPosition()
   // const angle = hoopRight["1"].getAngle()
@@ -1384,7 +1439,7 @@ function renderHoopRight() {
   // ctx.scale(-1, 1)
 
   // ctx.drawImage(
-  //   hoopLeftImage,
+  //   hoopRightImageInfo[0],
   //   -SCALE / 2.5,
   //   -SCALE * 3.78,
   //   SCALE * 0.8,
@@ -1395,10 +1450,27 @@ function renderHoopRight() {
 }
 
 function renderHoopRightTop() {
-  renderBox(hoopRight["2"])
-  renderBox(hoopRight["3"])
-  renderBox(hoopRight["4"])
-  renderBox(hoopRight["5"])
+  if (DEV_RENDER === true) {
+    renderBox(hoopRight["2"])
+    renderBox(hoopRight["3"])
+    renderBox(hoopRight["4"])
+    renderBox(hoopRight["5"])
+  }
+
+  renderImage(
+    hoopRightTopImageInfo[0],
+    true,
+    hoopRight["2"],
+    hoopRightTopImageInfo[1][0],
+    hoopRightTopImageInfo[1][1],
+    hoopRightTopImageInfo[1][2],
+    hoopRightTopImageInfo[1][3]
+  )
+
+  // renderBox(hoopRight["2"])
+  // renderBox(hoopRight["3"])
+  // renderBox(hoopRight["4"])
+  // renderBox(hoopRight["5"])
   // const pos = hoopRight["2"].getPosition()
   // const angle = hoopRight["2"].getAngle()
   // const canvasPos = toCanvas(pos)
@@ -1420,38 +1492,55 @@ function renderHoopRightTop() {
 }
 
 function renderHoopLeftBack() {
-  renderBox(hoopLeft["2"])
+  // renderBox(hoopLeft["2"])
+  renderImage(
+    hoopLeftBackImageInfo[0],
+    false,
+    hoopLeft["2"],
+    hoopLeftBackImageInfo[1][0],
+    hoopLeftBackImageInfo[1][1],
+    hoopLeftBackImageInfo[1][2],
+    hoopLeftBackImageInfo[1][3]
+  )
+
+  // if (!hoopLeft["2"]) return
+
   // const pos = hoopLeft["2"].getPosition()
   // const angle = hoopLeft["2"].getAngle()
   // const canvasPos = toCanvas(pos)
-
   // ctx.save()
   // ctx.translate(canvasPos.x, canvasPos.y)
   // ctx.rotate(-angle)
   // // ctx.scale(1, 1)
-
   // ctx.drawImage(
-  //   hoopLeftBackImage,
+  //   hoopLeftBackImageInfo[0],
   //   SCALE * 1.9,
   //   -SCALE / 2.22,
   //   SCALE * 0.685 * 3.17,
   //   SCALE * 0.685
   // )
-
   // ctx.restore()
 }
 
 function renderHoopRightBack() {
-  renderBox(hoopRight["2"])
+  renderImage(
+    hoopRightBackImageInfo[0],
+    true,
+    hoopRight["2"],
+    hoopRightBackImageInfo[1][0],
+    hoopRightBackImageInfo[1][1],
+    hoopRightBackImageInfo[1][2],
+    hoopRightBackImageInfo[1][3]
+  )
+
+  // renderBox(hoopRight["2"])
   // const pos = hoopRight["2"].getPosition()
   // const angle = hoopRight["2"].getAngle()
   // const canvasPos = toCanvas(pos)
-
   // ctx.save()
   // ctx.translate(canvasPos.x, canvasPos.y)
   // ctx.rotate(-angle)
   // ctx.scale(-1, 1)
-
   // ctx.drawImage(
   //   hoopLeftBackImage,
   //   SCALE * 1.9,
@@ -1459,7 +1548,6 @@ function renderHoopRightBack() {
   //   SCALE * 0.685 * 3.17,
   //   SCALE * 0.685
   // )
-
   // ctx.restore()
 }
 
@@ -1746,6 +1834,12 @@ function updateProperties() {
   updateProperty("ballIsPickedUpList", ballIsPickedUp)
   updateProperty("ballPickedUpPlayerList", ballPickedUpPlayer)
   updateProperty("playerPickedUpBallList", playerPickedUpBall)
+  if (hoopLeft["target"]) {
+    updateProperty("targetLeftPosition", [hoopLeft["target"].getPosition().x, hoopLeft["target"].getPosition().y])
+  }
+  if (hoopRight["target"]) {
+    updateProperty("targetRightPosition", [hoopRight["target"].getPosition().x, hoopRight["target"].getPosition().y])
+  }
 }
 
 function fulfillOrders() {
@@ -2176,3 +2270,7 @@ step()
 //     //
 //   }
 // }
+
+GameEngine.on("changeTexture", ({ name, textureInfo }) => {
+  changeTexture(name, textureInfo)
+})

@@ -179,9 +179,10 @@ function engineSpawnBall(x, y, id, size, frameList, bounciness, density) {
   })
 }
 
-// let properties = {}
+let properties = {}
 
 // GameEngine.on("updateProperty", ({ property, value }) => {
+//   // console.log(1)
 //   properties[property] = value
 //   console.log(properties)
 // })
@@ -257,6 +258,15 @@ function engineSpawnHoop(side, distance, height, width) {
   })
 }
 
+function engineChangeTexture(name, textureInfo){
+
+  // console.log(name, textureInfo)
+   GameEngine.emit("changeTexture", {
+    name: name,
+    textureInfo: textureInfo,
+  })
+}
+
 window.addEventListener("message", (event) => {
   const data = event.data
   const source = data.source
@@ -270,6 +280,8 @@ window.addEventListener("message", (event) => {
     togglePause(data.value)
   } else if (action === "engine/spawnPlayer") {
     engineSpawnPlayer(data)
+  } else if (action === "engine/changeTexture") {
+    engineChangeTexture(data.name, data.textureInfo)
   } else if (action === "engine/startJump") {
     engineStartJump(data.power, data.xOffset, data.rotation, data.ids)
   } else if (action === "engine/rotatePlayer") {

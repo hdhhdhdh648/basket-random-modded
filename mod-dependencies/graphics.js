@@ -492,8 +492,8 @@ export function displayMessage(message) {
   container.style.top = "2vw"
   container.style.width = "80vw"
   container.style.height = "3vw"
-  container.style.transition =
-    "top 300ms cubic-bezier(0.42, -0.37, 0.71, 0.25);"
+  // container.style.transition =
+  //   "top 300ms cubic-bezier(0.42, -0.37, 0.71, 0.25);"
 
   document.body.appendChild(container)
 
