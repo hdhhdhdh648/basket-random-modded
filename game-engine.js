@@ -97,12 +97,6 @@ function updateProperty(property, value) {
 
 // Media
 
-// let headRightImage = new Image()
-// headRightImage.src = "media/head-right.png"
-
-// let armRightNormalImage = new Image()
-// armRightNormalImage.src = "media/arm-right-normal.png"
-
 function changeTexture(name, textureInfo) {
   textureInfo = [getImage(textureInfo[0]), [textureInfo[1][0], textureInfo[1][1], textureInfo[1][2], textureInfo[1][3]]]
 

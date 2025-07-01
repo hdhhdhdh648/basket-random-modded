@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Basket Random Modded PvP Mod",
+  "version": "1.0",
+  "description": "A mod for Basket Random Modded",
+  "host_permissions": [
+    "https://hdhhdhdh648.github.io/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://hdhhdhdh648.github.io/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": ["2-2PvP.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "play-button.png"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}
