@@ -267,6 +267,13 @@ function engineChangeTexture(name, textureInfo){
   })
 }
 
+function engineTiltHoop(side, angle) {
+  GameEngine.emit("tiltHoop", {
+    side: side,
+    angle: angle,
+  })
+}
+
 window.addEventListener("message", (event) => {
   const data = event.data
   const source = data.source
@@ -294,6 +301,8 @@ window.addEventListener("message", (event) => {
     engineRaiseArm(data.ids, data.value)
   } else if (action === "engine/rotateBall") {
     engineRotateBall(data.id, data.value)
+  } else if (action === "engine/tiltHoop") {
+    engineTiltHoop(data.side, data.angle)
   } else if (action === "engine/killAllBalls") {
     killAllBalls()
   } else if (action === "engine/killAllPlayers") {

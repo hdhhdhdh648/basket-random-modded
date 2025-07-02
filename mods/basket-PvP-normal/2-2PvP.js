@@ -234,8 +234,11 @@ function onMessage(event) {
   } else if (action === "resume") {
     resumeGame()
   } else if (action === "terminate") {
-    console.log(1)
     endGame(true)
+  } else if (action === "ballOut") {
+    onBallOut(side)
+  } else if (action === "hoopTouch") {
+    onHoopTouch(side)
   }
 }
 
@@ -282,7 +285,7 @@ function changeHoopTexture(height) {
       source: "basket-PvP-normal-mod",
       action: "engine/changeTexture",
       name: "hoopLeft",
-      textureInfo: textureInfo
+      textureInfo: textureInfo,
     },
     "*"
   )
@@ -291,7 +294,7 @@ function changeHoopTexture(height) {
       source: "basket-PvP-normal-mod",
       action: "engine/changeTexture",
       name: "hoopRight",
-      textureInfo: textureInfo
+      textureInfo: textureInfo,
     },
     "*"
   )
@@ -388,6 +391,8 @@ function startGame(first = false) {
       hoopHeight = 2
     }
   }
+
+  // ballKind = "light" // TESTING
 
   // hoopHeight = -1.5 // TESTING
 
@@ -955,4 +960,53 @@ function spawnHoops(height, width) {
       "*"
     )
   }
+}
+
+function onBallOut() {
+  console.log("ball out")
+
+  togglePause(false)
+  changeProperty("speed", 1 / 300)
+  jumpingEnabled = false
+
+  setTimeout(() => {
+    fadeOut()
+  }, 2300)
+  setTimeout(() => {
+    killAllPlayers()
+    killAllBalls()
+  }, 2520)
+  setTimeout(() => {
+    startGame()
+  }, 2550)
+  setTimeout(() => {
+    fadeIn()
+  }, 2700)
+}
+
+function onHoopTouch(side) {
+  console.log(1, side)
+  if (side === "left") {
+    tiltHoop(side, 0.05)
+    setTimeout(() => {
+      tiltHoop(side, 0)
+    }, 200)
+  } else if (side === "right") {
+    tiltHoop(side, 0.05)
+    setTimeout(() => {
+      tiltHoop(side, 0)
+    }, 200)
+  }
+}
+
+function tiltHoop(side, angle) {
+  window.postMessage(
+    {
+      source: "basket-PvP-normal-mod",
+      action: "engine/tiltHoop",
+      side: side,
+      angle: angle,
+    },
+    "*"
+  )
 }
