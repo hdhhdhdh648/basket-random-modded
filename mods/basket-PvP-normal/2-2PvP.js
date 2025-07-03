@@ -236,9 +236,9 @@ function onMessage(event) {
   } else if (action === "terminate") {
     endGame(true)
   } else if (action === "ballOut") {
-    onBallOut(side)
+    onBallOut(data.side)
   } else if (action === "hoopTouch") {
-    onHoopTouch(side)
+    onHoopTouch(data.side)
   }
 }
 
@@ -270,7 +270,7 @@ function onKeyUp(event) {
   }
 }
 
-function changeHoopTexture(height) {
+function changeHoopTexture(height, width) {
   let textureInfo
   if (height === 0) {
     textureInfo = ["media/hoop-left.png", [0, -4, 40, 368]]
@@ -278,6 +278,21 @@ function changeHoopTexture(height) {
     textureInfo = ["media/hoop-left-long.png", [0, -4, 40, 465]]
   } else if (height === -1.5) {
     textureInfo = ["media/hoop-left-short.png", [0, -4, 40, 290]]
+  }
+  let textureTopInfo
+  let textureBackInfo
+  let textureNetInfo
+  if (width === 0) {
+    textureTopInfo = ["media/hoop-left-top.png", [70, -65, 270, 240]]
+    textureBackInfo = ["media/hoop-left-back.png", [150.2, -2, 109.5, 34.5]]
+    textureNetInfo = ["media/net-left.png", [0, 0, 26 * 2.8, 18 * 2.8]]
+  } else if (width === 0.7) {
+    textureTopInfo = ["media/hoop-left-top-large.png", [85, -65, 300, 240]]
+    textureBackInfo = [
+      "media/hoop-left-back-large.png",
+      [164.2, -2, 141.5, 34.5],
+    ]
+    textureNetInfo = ["media/net-left-large.png", [-5, 0, 38 * 2.8, 18 * 2.8]]
   }
 
   window.postMessage(
@@ -295,6 +310,60 @@ function changeHoopTexture(height) {
       action: "engine/changeTexture",
       name: "hoopRight",
       textureInfo: textureInfo,
+    },
+    "*"
+  )
+  window.postMessage(
+    {
+      source: "basket-PvP-normal-mod",
+      action: "engine/changeTexture",
+      name: "hoopLeftTop",
+      textureInfo: textureTopInfo,
+    },
+    "*"
+  )
+  window.postMessage(
+    {
+      source: "basket-PvP-normal-mod",
+      action: "engine/changeTexture",
+      name: "hoopRightTop",
+      textureInfo: textureTopInfo,
+    },
+    "*"
+  )
+  window.postMessage(
+    {
+      source: "basket-PvP-normal-mod",
+      action: "engine/changeTexture",
+      name: "hoopLeftBack",
+      textureInfo: textureBackInfo,
+    },
+    "*"
+  )
+  window.postMessage(
+    {
+      source: "basket-PvP-normal-mod",
+      action: "engine/changeTexture",
+      name: "hoopRightBack",
+      textureInfo: textureBackInfo,
+    },
+    "*"
+  )
+  window.postMessage(
+    {
+      source: "basket-PvP-normal-mod",
+      action: "engine/changeTexture",
+      name: "hoopLeftNet",
+      textureInfo: textureNetInfo,
+    },
+    "*"
+  )
+  window.postMessage(
+    {
+      source: "basket-PvP-normal-mod",
+      action: "engine/changeTexture",
+      name: "hoopRightNet",
+      textureInfo: textureNetInfo,
     },
     "*"
   )
@@ -352,6 +421,7 @@ function startGame(first = false) {
   let armSize = "normal"
   let snow = false
   let hoopHeight = 0
+  let hoopWidth = 0
 
   let modifiers
 
@@ -389,6 +459,8 @@ function startGame(first = false) {
       hoopHeight = -1.5
     } else if (modifer === "LONG HOOP") {
       hoopHeight = 2
+    } else if (modifer === "LARGE HOOP") {
+      hoopWidth = 0
     }
   }
 
@@ -421,8 +493,10 @@ function startGame(first = false) {
     )
   }
 
-  spawnHoops(hoopHeight, 0)
-  changeHoopTexture(hoopHeight)
+  hoopWidth = 0.7 // TESTINGs
+
+  spawnHoops(hoopHeight, hoopWidth)
+  changeHoopTexture(hoopHeight, hoopWidth)
 
   let menuCover = document.querySelector("#menu-cover")
 
@@ -992,7 +1066,7 @@ function onHoopTouch(side) {
       tiltHoop(side, 0)
     }, 200)
   } else if (side === "right") {
-    tiltHoop(side, 0.05)
+    tiltHoop(side, -0.05)
     setTimeout(() => {
       tiltHoop(side, 0)
     }, 200)

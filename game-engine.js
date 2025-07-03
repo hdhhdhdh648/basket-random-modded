@@ -122,6 +122,10 @@ function changeTexture(name, textureInfo) {
     hoopLeftBackImageInfo = textureInfo
   } else if (name === "hoopRightBack") {
     hoopRightBackImageInfo = textureInfo
+  } else if (name === "hoopLeftNet") {
+    hoopLeftNetImageInfo = textureInfo
+  } else if (name === "hoopRightNet") {
+    hoopRightNetImageInfo = textureInfo
   }
 }
 
@@ -144,6 +148,15 @@ let hoopLeftBackImageInfo = [
 let hoopRightBackImageInfo = [
   getImage("media/hoop-left-back.png"),
   [150.2, -2, 109.5, 34.5],
+]
+
+let hoopLeftNetImageInfo = [
+  getImage("media/net-left.png"),
+  [0, 0, 26*2.8, 18*2.8],
+]
+let hoopRightNetImageInfo = [
+  getImage("media/net-left.png"),
+  [0, 0, 26*2.8, 18*2.8],
 ]
 
 let shadowImage = new Image()
@@ -637,6 +650,7 @@ function spawnHoop(side, distance = 14.4, height = 0, width = 0) {
     direction = -1
     destroyLeftHoop()
   } else {
+    width = -width
     destroyRightHoop()
   }
 
@@ -688,7 +702,7 @@ function spawnHoop(side, distance = 14.4, height = 0, width = 0) {
   })
 
   const hoopTarget = world.createBody(
-    Vec2(direction * (HOOP_DISTANCE - 3.9), 8 + RAISE + height)
+    Vec2(direction * (HOOP_DISTANCE - 3.9) + width/2, 8 + RAISE + height)
   )
   hoopTarget.createFixture(pl.Box(0.5, 0.5), {
     restitution: 0.5,
@@ -718,6 +732,7 @@ function spawnHoop(side, distance = 14.4, height = 0, width = 0) {
       hoop1
     )
   )
+  console.log(width)
 
   if (side === "left") {
     hoopLeft["1"] = hoop1
@@ -738,7 +753,7 @@ function spawnHoop(side, distance = 14.4, height = 0, width = 0) {
     hoopRight["target"] = hoopTarget
     hoopRight["net"] = hoopNet
     hoopRight["joint"] = hoopJoint
-    hoopRight["width"] = -width
+    hoopRight["width"] = width
   }
 }
 
@@ -1138,46 +1153,68 @@ function offsetBody(bodyA, bodyB, offset, copyAngle = true) {
 }
 
 function renderHoopNetLeft() {
-  if (!hoopLeft["net"] || !hoopLeft["2"]) return
+  renderImage(
+    hoopLeftNetImageInfo[0],
+    false,
+    hoopLeft["net"],
+    hoopLeftNetImageInfo[1][0],
+    hoopLeftNetImageInfo[1][1],
+    hoopLeftNetImageInfo[1][2],
+    hoopLeftNetImageInfo[1][3]
+  )
 
-  const pos = hoopLeft["net"].getPosition()
-  const angle = hoopLeft["2"].getAngle()
+  // if (!hoopLeft["net"] || !hoopLeft["2"]) return
 
-  const canvasPos = toCanvas(pos)
+  // const pos = hoopLeft["net"].getPosition()
+  // const angle = hoopLeft["2"].getAngle()
 
-  ctx.save()
-  ctx.translate(canvasPos.x, canvasPos.y)
-  ctx.rotate(-angle)
+  // const canvasPos = toCanvas(pos)
 
-  const width = SCALE * 1.44
-  const height = SCALE
-  const dx = -width / 2
-  const dy = -height / 2
+  // ctx.save()
+  // ctx.translate(canvasPos.x, canvasPos.y)
+  // ctx.rotate(-angle)
 
-  ctx.drawImage(hoopNetLeftImage, dx, dy, width, height)
+  // const width = SCALE * 1.44
+  // const height = SCALE
+  // const dx = -width / 2
+  // const dy = -height / 2
 
-  ctx.restore()
+  // ctx.drawImage(hoopNetLeftImage, dx, dy, width, height)
+
+  // ctx.restore()
 }
 
 function renderHoopNetRight() {
-  if (!hoopRight["net"] || !hoopRight["2"]) return
+  // renderImage()
 
-  const pos = hoopRight["net"].getPosition()
-  const angle = hoopRight["2"].getAngle()
-  const canvasPos = toCanvas(pos)
+  renderImage(
+    hoopRightNetImageInfo[0],
+    true,
+    hoopRight["net"],
+    hoopRightNetImageInfo[1][0],
+    hoopRightNetImageInfo[1][1],
+    hoopRightNetImageInfo[1][2],
+    hoopRightNetImageInfo[1][3]
+  )
 
-  ctx.save()
-  ctx.translate(canvasPos.x, canvasPos.y)
-  ctx.rotate(-angle)
+  // if (!hoopRight["net"] || !hoopRight["2"]) return
 
-  const width = SCALE * 1.44
-  const height = SCALE
-  const dx = -width / 2
-  const dy = -height / 2
+  // const pos = hoopRight["net"].getPosition()
+  // const angle = hoopRight["2"].getAngle()
+  // const canvasPos = toCanvas(pos)
 
-  ctx.drawImage(hoopNetLeftImage, dx, dy, width, height)
+  // ctx.save()
+  // ctx.translate(canvasPos.x, canvasPos.y)
+  // ctx.rotate(-angle)
 
-  ctx.restore()
+  // const width = SCALE * 1.44
+  // const height = SCALE
+  // const dx = -width / 2
+  // const dy = -height / 2
+
+  // ctx.drawImage(hoopNetLeftImage, dx, dy, width, height)
+
+  // ctx.restore()
 }
 
 function hoopLeftHandler() {
@@ -1186,9 +1223,10 @@ function hoopLeftHandler() {
   // offsetBody(hoopLeft2, hoopLeft3, Vec2(1.4, 1.4))
   // offsetBody(hoopLeft2, hoopLeft4, Vec2(1.8, -0.15))
   // offsetBody(hoopLeft2, hoopLeft5, Vec2(3.85, -0.15))
-  offsetBody(hoopLeft["2"], hoopLeft["net"], Vec2(3, -1.1))
+  offsetBody(hoopLeft["2"], hoopLeft["net"], Vec2(3 + width/2, -1.1))
   offsetBody(hoopLeft["2"], hoopLeft["3"], Vec2(1.4, 1.4))
   offsetBody(hoopLeft["2"], hoopLeft["4"], Vec2(1.8, -0.15))
+  // console.log(width)
   offsetBody(hoopLeft["2"], hoopLeft["5"], Vec2(3.85 + width, -0.15))
 }
 
@@ -1198,7 +1236,7 @@ function hoopRightHandler() {
   // offsetBody(hoopRight2, hoopRight3, Vec2(-1.4, 1.4))
   // offsetBody(hoopRight2, hoopRight4, Vec2(-1.8, -0.15))
   // offsetBody(hoopRight2, hoopRight5, Vec2(-3.85, -0.15))
-  offsetBody(hoopRight["2"], hoopRight["net"], Vec2(-3, -1.1))
+  offsetBody(hoopRight["2"], hoopRight["net"], Vec2(-3 + width/2, -1.1))
   offsetBody(hoopRight["2"], hoopRight["3"], Vec2(-1.4, 1.4))
   offsetBody(hoopRight["2"], hoopRight["4"], Vec2(-1.8, -0.15))
   offsetBody(hoopRight["2"], hoopRight["5"], Vec2(-3.85 + width, -0.15))
@@ -1251,6 +1289,8 @@ function renderHoopLeftTop() {
     renderBox(hoopLeft["3"])
     renderBox(hoopLeft["4"])
     renderBox(hoopLeft["5"])
+    renderBox(hoopLeft["target"])
+    renderBox(hoopLeft["net"])
   }
 
   renderImage(
@@ -1327,6 +1367,8 @@ function renderHoopRightTop() {
     renderBox(hoopRight["3"])
     renderBox(hoopRight["4"])
     renderBox(hoopRight["5"])
+    renderBox(hoopRight["target"])
+    renderBox(hoopRight["net"])
   }
 
   renderImage(
@@ -2018,12 +2060,14 @@ world.on("begin-contact", (contact) => {
     hoopLeft["3"],
     hoopLeft["4"],
     hoopLeft["5"],
+    hoopLeft["target"],
   ]
   const hoopRightBodies = [
     hoopRight["2"],
     hoopRight["3"],
     hoopRight["4"],
     hoopRight["5"],
+    hoopRight["target"],
   ]
 
   let isHoopLeft =
@@ -2059,7 +2103,7 @@ world.on("begin-contact", (contact) => {
       {
         source: "game-engine",
         action: "hoopTouch",
-        side: "right",
+        side: "left",
       },
       "*"
     )
@@ -2072,7 +2116,7 @@ world.on("begin-contact", (contact) => {
       {
         source: "game-engine",
         action: "hoopTouch",
-        side: "left",
+        side: "right",
       },
       "*"
     )
