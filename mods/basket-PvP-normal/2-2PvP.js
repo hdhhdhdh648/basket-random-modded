@@ -493,7 +493,7 @@ function startGame(first = false) {
     )
   }
 
-  hoopWidth = 0.7 // TESTINGs
+  // hoopWidth = 0.7 // TESTING
 
   spawnHoops(hoopHeight, hoopWidth)
   changeHoopTexture(hoopHeight, hoopWidth)

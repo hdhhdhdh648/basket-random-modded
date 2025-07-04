@@ -55,7 +55,7 @@ let playerTeam = {} // playerId, teamId
 
 // Engine and canvas setup
 
-let SCALE = 50
+let SCALE = 100
 let SIMULATION_SPEED = 1 / 60
 
 const RAISE = 4.5
@@ -69,12 +69,16 @@ const div = document.querySelector("div")
 
 const ctx = canvas.getContext("2d")
 ctx.imageSmoothingEnabled = false
+
+// ctx.imageSmoothingEnabled = true
+// ctx.imageSmoothingQuality = "high"
+
 ctx.webkitImageSmoothingEnabled = false
 ctx.mozImageSmoothingEnabled = false
 ctx.msImageSmoothingEnabled = false
 
-canvas.width = "2000"
-canvas.height = "1000"
+canvas.width = "4000"
+canvas.height = "2000"
 
 // import planck from 'planck-js'
 // import planck from 'https://unpkg.com/planck-js@latest/dist/planck.mjs'
@@ -970,6 +974,11 @@ function pointArmRightDown(arm, targetAngle = 0, stiffness = 4, damping = 0.5) {
 
 function renderImage(image, flip, body, xOffset, yOffset, xScale, yScale) {
   if (!body) return
+
+  xOffset = xOffset * SCALE/50
+  yOffset = yOffset * SCALE/50
+  xScale = xScale * SCALE/50
+  yScale = yScale * SCALE/50
 
   const pos = body.getPosition()
   const angle = body.getAngle()
