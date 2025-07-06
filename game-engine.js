@@ -220,13 +220,6 @@ GameEngine.on(
     armAttachedTextures,
     headAttachedTextures,
     bodyAttachedTextures,
-    // armTexture,
-    // armTextureOffset,
-    // headTexture,
-    // headTextureOffset,
-    // bodyTexture,
-    // bodyTextureOffset,
-    // attachedTextures,
   }) => {
     spawnPlayer(
       side,
@@ -241,13 +234,6 @@ GameEngine.on(
       armAttachedTextures,
       headAttachedTextures,
       bodyAttachedTextures
-      // armTexture,
-      // armTextureOffset,
-      // headTexture,
-      // headTextureOffset,
-      // bodyTexture,
-      // bodyTextureOffset,
-      // attachedTextures
     )
   }
 )
@@ -538,7 +524,6 @@ function checkIfBallBounds() {
     }
 
     if (positionX > HOOP_DISTANCE) {
-      console.log("out right")
       ballOut[ballId] = true
       window.postMessage(
         {
@@ -550,7 +535,6 @@ function checkIfBallBounds() {
         "*"
       )
     } else if (positionX < -HOOP_DISTANCE) {
-      console.log("out left")
       ballOut[ballId] = true
       window.postMessage(
         {
@@ -736,7 +720,6 @@ function spawnHoop(side, distance = 14.4, height = 0, width = 0) {
       hoop1
     )
   )
-  console.log(width)
 
   if (side === "left") {
     hoopLeft["1"] = hoop1
@@ -796,12 +779,10 @@ function spawnPlayer(
   ]
 
   // Feet
-
   const feet = world.createDynamicBody(Vec2(x, 1.4 + RAISE - 0.9 + y))
   feet.createFixture(pl.Circle(0.5), {
     density: 1,
     friction: feetFriction,
-    // friction: 0.1,
     filterCategoryBits: 0x0002,
     filterMaskBits: 0x0001,
   })
@@ -815,14 +796,6 @@ function spawnPlayer(
     filterCategoryBits: 0x0001,
     filterMaskBits: 0x0001 | 0x0002 | 0x0003,
   })
-  // Weight (center of mass to be under to balance player)
-  //  const weight = world.createDynamicBody(Vec2(10, -4+RAISE))
-  // weight.createFixture(pl.Box(0.5, 0.5), {
-  //   density: 1,
-  //   friction: 0.3,
-  //   restitution: 0.5,
-  //   isSensor: true
-  // })
   // Head
   const head = world.createDynamicBody(
     Vec2(x - 0.15 * side, 4.9 + RAISE - 0.9 + y)
@@ -1008,15 +981,10 @@ function renderHead(id) {
     textureList[id]
   let [feet, body, head, arm] = playerList[id]
 
-  // renderBox(head)
-  // return
-
   let flip = false
   if (playerSideList[id] === "flip") {
     flip = true
   }
-
-  // renderBox(head)
 
   for (let index in headAttachedTextures) {
     let textureInfo = headAttachedTextures[index]
@@ -1031,16 +999,10 @@ function renderBody(id) {
     textureList[id]
   let [feet, body, head, arm] = playerList[id]
 
-  // renderBox(body)
-  // // renderBox(feet)
-  // return
-
   let flip = false
   if (playerSideList[id] === "flip") {
     flip = true
   }
-
-  // renderBox(body)
 
   for (let index in bodyAttachedTextures) {
     let textureInfo = bodyAttachedTextures[index]
@@ -1060,8 +1022,6 @@ function renderArm(id) {
     flip = true
   }
 
-  // renderBox(arm)
-
   for (let index in armAttachedTextures) {
     let textureInfo = armAttachedTextures[index]
     let [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
@@ -1075,24 +1035,6 @@ function renderBall(ball, size, frameList, frameIndex) {
     return
   }
 
-  // const pos = ball.getPosition()
-  // const angle = ball.getAngle()
-  // const canvasPos = toCanvas(pos)
-
-  // ctx.save()
-  // ctx.translate(canvasPos.x, canvasPos.y)
-  // ctx.rotate(-angle)
-
-  // ctx.drawImage(
-  //   frameList[frameIndex],
-  //   (-SCALE / 2) * 2 * size,
-  //   (-SCALE / 2) * 2 * size,
-  //   SCALE * 2 * size,
-  //   SCALE * 2 * size
-  // )
-
-  // ctx.restore()
-
   renderImage(frameList[frameIndex], false, ball, 0, 0, 60, 60)
 }
 
@@ -1101,14 +1043,12 @@ function renderBalls() {
     if (ballIsPickedUp[id] === true) {
       return
     }
-    // renderSphere(ballList[id], "orange")
     renderBall(
       ballList[id],
       ballSizeList[id],
       ballFrameList[id],
       ballFrameIndex[id]
     )
-    //  renderSphere(ballList[id], "orange")
   }
 }
 
@@ -1140,8 +1080,6 @@ function offsetBody(bodyA, bodyB, offset, copyAngle = true) {
   if (!bodyA || !bodyB) return
   const posA = bodyA.getPosition()
   const angleA = bodyA.getAngle()
-
-  // Rotate offset manually (2D rotation)
   const cos = Math.cos(angleA)
   const sin = Math.sin(angleA)
   const rotatedOffset = planck.Vec2(
@@ -1149,13 +1087,10 @@ function offsetBody(bodyA, bodyB, offset, copyAngle = true) {
     offset.x * sin + offset.y * cos
   )
 
-  // Compute world position
   const posB = posA.clone().add(rotatedOffset)
 
-  // Set bodyB position
   bodyB.setPosition(posB)
 
-  // Optionally copy angle
   if (copyAngle) {
     bodyB.setAngle(angleA)
   }
@@ -1171,31 +1106,9 @@ function renderHoopNetLeft() {
     hoopLeftNetImageInfo[1][2],
     hoopLeftNetImageInfo[1][3]
   )
-
-  // if (!hoopLeft["net"] || !hoopLeft["2"]) return
-
-  // const pos = hoopLeft["net"].getPosition()
-  // const angle = hoopLeft["2"].getAngle()
-
-  // const canvasPos = toCanvas(pos)
-
-  // ctx.save()
-  // ctx.translate(canvasPos.x, canvasPos.y)
-  // ctx.rotate(-angle)
-
-  // const width = SCALE * 1.44
-  // const height = SCALE
-  // const dx = -width / 2
-  // const dy = -height / 2
-
-  // ctx.drawImage(hoopNetLeftImage, dx, dy, width, height)
-
-  // ctx.restore()
 }
 
 function renderHoopNetRight() {
-  // renderImage()
-
   renderImage(
     hoopRightNetImageInfo[0],
     true,
@@ -1205,76 +1118,23 @@ function renderHoopNetRight() {
     hoopRightNetImageInfo[1][2],
     hoopRightNetImageInfo[1][3]
   )
-
-  // if (!hoopRight["net"] || !hoopRight["2"]) return
-
-  // const pos = hoopRight["net"].getPosition()
-  // const angle = hoopRight["2"].getAngle()
-  // const canvasPos = toCanvas(pos)
-
-  // ctx.save()
-  // ctx.translate(canvasPos.x, canvasPos.y)
-  // ctx.rotate(-angle)
-
-  // const width = SCALE * 1.44
-  // const height = SCALE
-  // const dx = -width / 2
-  // const dy = -height / 2
-
-  // ctx.drawImage(hoopNetLeftImage, dx, dy, width, height)
-
-  // ctx.restore()
 }
 
 function hoopLeftHandler() {
   let width = hoopLeft["width"]
-  // offsetBody(hoopLeft2, hoopLeftNet, Vec2(3, -1.1))
-  // offsetBody(hoopLeft2, hoopLeft3, Vec2(1.4, 1.4))
-  // offsetBody(hoopLeft2, hoopLeft4, Vec2(1.8, -0.15))
-  // offsetBody(hoopLeft2, hoopLeft5, Vec2(3.85, -0.15))
   offsetBody(hoopLeft["2"], hoopLeft["net"], Vec2(3 + width/2, -1.1))
   offsetBody(hoopLeft["2"], hoopLeft["3"], Vec2(1.4, 1.4))
   offsetBody(hoopLeft["2"], hoopLeft["4"], Vec2(1.8, -0.15))
-  // console.log(width)
   offsetBody(hoopLeft["2"], hoopLeft["5"], Vec2(3.85 + width, -0.15))
 }
 
 function hoopRightHandler() {
   let width = hoopRight["width"]
-  // offsetBody(hoopRight2, hoopRightNet, Vec2(-3, -1.1))
-  // offsetBody(hoopRight2, hoopRight3, Vec2(-1.4, 1.4))
-  // offsetBody(hoopRight2, hoopRight4, Vec2(-1.8, -0.15))
-  // offsetBody(hoopRight2, hoopRight5, Vec2(-3.85, -0.15))
   offsetBody(hoopRight["2"], hoopRight["net"], Vec2(-3 + width/2, -1.1))
   offsetBody(hoopRight["2"], hoopRight["3"], Vec2(-1.4, 1.4))
   offsetBody(hoopRight["2"], hoopRight["4"], Vec2(-1.8, -0.15))
   offsetBody(hoopRight["2"], hoopRight["5"], Vec2(-3.85 + width, -0.15))
 }
-
-// function renderHoopNetRight() {
-//   const pos = hoopRightNet.getPosition();
-//   const canvasPos = toCanvas(pos);
-
-//   ctx.save();
-//   ctx.translate(canvasPos.x, canvasPos.y);
-
-//   // ctx.scale(-1, 1)
-
-//   const width = SCALE * 1.75;
-//   const height = SCALE;
-//   const dx = -width / 2;
-//   const dy = -height / 2;
-
-//   ctx.drawImage(
-//     hoopNetLeftImage,
-//     dx,
-//     dy,
-//     width,
-//     height
-//   );
-
-//   ctx.restore();
-// }
 
 function renderHoopLeft() {
   if (DEV_RENDER === true) {
@@ -1313,24 +1173,6 @@ function renderHoopLeftTop() {
   )
 
   if (!hoopLeft["2"]) return
-
-  // const pos = hoopLeft["2"].getPosition()
-  // const angle = hoopLeft["2"].getAngle()
-  // const canvasPos = toCanvas(pos)
-
-  // ctx.save()
-  // ctx.translate(canvasPos.x, canvasPos.y)
-  // ctx.rotate(-angle)
-
-  // ctx.drawImage(
-  //   hoopLeftTopImageInfo[0],
-  //   -SCALE * 1.3,
-  //   -SCALE * 3.77,
-  //   SCALE * 4.8 * 1.12,
-  //   SCALE * 4.8
-  // )
-
-  // ctx.restore()
 }
 
 function renderHoopRight() {
@@ -1347,27 +1189,6 @@ function renderHoopRight() {
     hoopRightImageInfo[1][2],
     hoopRightImageInfo[1][3]
   )
-
-  // if (!hoopRight["1"]) return
-
-  // const pos = hoopRight["1"].getPosition()
-  // const angle = hoopRight["1"].getAngle()
-  // const canvasPos = toCanvas(pos)
-
-  // ctx.save()
-  // ctx.translate(canvasPos.x, canvasPos.y)
-  // ctx.rotate(-angle)
-  // ctx.scale(-1, 1)
-
-  // ctx.drawImage(
-  //   hoopRightImageInfo[0],
-  //   -SCALE / 2.5,
-  //   -SCALE * 3.78,
-  //   SCALE * 0.8,
-  //   SCALE * 0.8 * 9.21
-  // )
-
-  // ctx.restore()
 }
 
 function renderHoopRightTop() {
@@ -1389,33 +1210,9 @@ function renderHoopRightTop() {
     hoopRightTopImageInfo[1][2],
     hoopRightTopImageInfo[1][3]
   )
-
-  // renderBox(hoopRight["2"])
-  // renderBox(hoopRight["3"])
-  // renderBox(hoopRight["4"])
-  // renderBox(hoopRight["5"])
-  // const pos = hoopRight["2"].getPosition()
-  // const angle = hoopRight["2"].getAngle()
-  // const canvasPos = toCanvas(pos)
-
-  // ctx.save()
-  // ctx.translate(canvasPos.x, canvasPos.y)
-  // ctx.rotate(-angle)
-  // ctx.scale(-1, 1)
-
-  // ctx.drawImage(
-  //   hoopLeftTopImage,
-  //   -SCALE * 1.3,
-  //   -SCALE * 3.77,
-  //   SCALE * 4.8 * 1.12,
-  //   SCALE * 4.8
-  // )
-
-  // ctx.restore()
 }
 
 function renderHoopLeftBack() {
-  // renderBox(hoopLeft["2"])
   renderImage(
     hoopLeftBackImageInfo[0],
     false,
@@ -1425,24 +1222,6 @@ function renderHoopLeftBack() {
     hoopLeftBackImageInfo[1][2],
     hoopLeftBackImageInfo[1][3]
   )
-
-  // if (!hoopLeft["2"]) return
-
-  // const pos = hoopLeft["2"].getPosition()
-  // const angle = hoopLeft["2"].getAngle()
-  // const canvasPos = toCanvas(pos)
-  // ctx.save()
-  // ctx.translate(canvasPos.x, canvasPos.y)
-  // ctx.rotate(-angle)
-  // // ctx.scale(1, 1)
-  // ctx.drawImage(
-  //   hoopLeftBackImageInfo[0],
-  //   SCALE * 1.9,
-  //   -SCALE / 2.22,
-  //   SCALE * 0.685 * 3.17,
-  //   SCALE * 0.685
-  // )
-  // ctx.restore()
 }
 
 function renderHoopRightBack() {
@@ -1455,23 +1234,6 @@ function renderHoopRightBack() {
     hoopRightBackImageInfo[1][2],
     hoopRightBackImageInfo[1][3]
   )
-
-  // renderBox(hoopRight["2"])
-  // const pos = hoopRight["2"].getPosition()
-  // const angle = hoopRight["2"].getAngle()
-  // const canvasPos = toCanvas(pos)
-  // ctx.save()
-  // ctx.translate(canvasPos.x, canvasPos.y)
-  // ctx.rotate(-angle)
-  // ctx.scale(-1, 1)
-  // ctx.drawImage(
-  //   hoopLeftBackImage,
-  //   SCALE * 1.9,
-  //   -SCALE / 2.22,
-  //   SCALE * 0.685 * 3.17,
-  //   SCALE * 0.685
-  // )
-  // ctx.restore()
 }
 
 // For testing
@@ -1613,9 +1375,6 @@ let ballLeftTop = false
 let ballLeftBottom = false
 
 function scoreLeftHandler() {
-  // let top = areBodiesTouching(ballList[1], hoopLeftTarget)
-  // let bottom = areBodiesTouching(ballList[1], hoopLeftNet)
-
   let top = areBodiesTouching(ballList[1], hoopLeft["target"])
   let bottom = areBodiesTouching(ballList[1], hoopLeft["net"])
 
@@ -1644,8 +1403,6 @@ function scoreLeftHandler() {
       },
       "*"
     )
-    // GameEngine.emit("score", { side: "left" })
-    // SIMULATION_SPEED = 1/300
   }
 }
 
@@ -1653,9 +1410,6 @@ let ballRightTop = false
 let ballRightBottom = false
 
 function scoreRightHandler() {
-  // let top = areBodiesTouching(ballList[1], hoopRightTarget)
-  // let bottom = areBodiesTouching(ballList[1], hoopRightNet)
-
   let top = areBodiesTouching(ballList[1], hoopRight["target"])
   let bottom = areBodiesTouching(ballList[1], hoopRight["net"])
 
@@ -1684,8 +1438,6 @@ function scoreRightHandler() {
       },
       "*"
     )
-    // GameEngine.emit("score", { side: "right" })
-    // SIMULATION_SPEED = 1/300
   }
 }
 
@@ -1730,14 +1482,6 @@ function simulate() {
 
     renderHead(id)
     renderBody(id)
-
-    // TO DELETE, FOR TESTING
-    // renderBox(hoopRightTarget, "green")
-    // renderBox(hoopRightNet, "green")
-    // renderBox(hoopLeftTarget, "green")
-    // renderBox(hoopLeftNet, "green")
-    // renderBox(hoopRight5, "green")
-    // renderBox(hoopRig/htNet, "green")
   }
 
   renderBallsPickedUp()
@@ -1864,7 +1608,6 @@ function throwBall(
   playerIsPickedUpBall[playerId] = false
 
   setTimeout(() => {
-    // isPlayerPickingUpDisabled[playerId] = false
     setTeamPickingUp(playerId, false)
   }, 200)
 }
@@ -1946,7 +1689,6 @@ function ballHandler() {
         playerPickedUpBall[playerId] = ballId
         playerIsPickedUpBall[playerId] = true
 
-        //  isPlayerPickingUpDisabled[playerId] !== true
         setTeamPickingUp(playerId, true)
 
         pickUpBall(ball, hand)
@@ -2013,8 +1755,6 @@ function relativeForce(target, force) {
   )
 
   const additionalVelocity = worldDir.mul(1)
-  // const currentVelocity = target.getLinearVelocity()
-  // const newVelocity = currentVelocity.clone().add(additionalVelocity)
 
   target.setLinearVelocity(additionalVelocity)
 }
@@ -2054,15 +1794,10 @@ function rotateBall(id, rotation) {
 }
 
 world.on("begin-contact", (contact) => {
-  // testingGetBodyCount()
-
   const fixtureA = contact.getFixtureA()
   const fixtureB = contact.getFixtureB()
   const bodyA = fixtureA.getBody()
   const bodyB = fixtureB.getBody()
-
-  // const hoopLeftBodies = [hoopLeft2, hoopLeft3, hoopLeft4, hoopLeft5]
-  // const hoopRightBodies = [hoopRight2, hoopRight3, hoopRight4, hoopRight5]
 
   const hoopLeftBodies = [
     hoopLeft["2"],
@@ -2116,10 +1851,6 @@ world.on("begin-contact", (contact) => {
       },
       "*"
     )
-    // hoopLeft["joint"].setLimits(0.05, 0)
-    // setTimeout(() => {
-    //   hoopLeft["joint"].setLimits(0, 0)
-    // }, 200)
   } else if (isHoopRight && isBall) {
     window.postMessage(
       {
@@ -2129,10 +1860,6 @@ world.on("begin-contact", (contact) => {
       },
       "*"
     )
-    // hoopRight["joint"].setLimits(-0.05, 0)
-    // setTimeout(() => {
-    //   hoopRight["joint"].setLimits(0, 0)
-    // }, 200)
   } else if (isFeet && isGround && playerAirborne[feetPlayerId] === true) {
     playerAirborne[feetPlayerId] = false
     window.postMessage(
@@ -2163,10 +1890,8 @@ GameEngine.on("changeTexture", ({ name, textureInfo }) => {
 
 GameEngine.on("tiltHoop", ({ side, angle }) => {
   if (side === "left") {
-    console.log("left")
     hoopLeft["joint"].setLimits(angle, 0)
   } else if (side === "right") {
-    console.log("right")
     hoopRight["joint"].setLimits(angle, 0)
   }
 })
