@@ -60,7 +60,7 @@ let SIMULATION_SPEED = 1 / 60
 
 const RAISE = 4.5
 
-const DEV_RENDER = false
+const DEV_RENDER = true
 
 let orders = {}
 
@@ -156,11 +156,11 @@ let hoopRightBackImageInfo = [
 
 let hoopLeftNetImageInfo = [
   getImage("media/net-left.png"),
-  [0, 0, 26*2.8, 18*2.8],
+  [0, 0, 26 * 2.8, 18 * 2.8],
 ]
 let hoopRightNetImageInfo = [
   getImage("media/net-left.png"),
-  [0, 0, 26*2.8, 18*2.8],
+  [0, 0, 26 * 2.8, 18 * 2.8],
 ]
 
 let shadowImage = new Image()
@@ -216,6 +216,7 @@ GameEngine.on(
     reach,
     armSize,
     armWidth,
+    headSize,
     feetFriction,
     armAttachedTextures,
     headAttachedTextures,
@@ -230,6 +231,7 @@ GameEngine.on(
       reach,
       armSize,
       armWidth,
+      headSize,
       feetFriction,
       armAttachedTextures,
       headAttachedTextures,
@@ -432,18 +434,8 @@ GameEngine.on("killAllBalls", ({}) => {
 })
 
 function KillBall(id) {
-  // world.destroyBody(ballList[id])
   bodiesToDestroy.push(ballList[id])
-
   ballsToKill.push(id)
-
-  // ballList[id] = null
-
-  // ballDensityList[id] = null
-  // ballFrameIndex[id] = null
-  // ballFrameList[id] = null
-  // ballIsPickedUp[id] = null
-  // ballPickedUpPlayer[id] = null
 }
 
 function KillAllBalls() {
@@ -454,7 +446,6 @@ function KillAllBalls() {
 
 function bodyDestroyHandler() {
   for (const body of bodiesToDestroy) {
-    // if (!body) return
     world.destroyBody(body)
   }
   bodiesToDestroy.length = 0
@@ -462,7 +453,6 @@ function bodyDestroyHandler() {
 
 function jointDestroyHandler() {
   for (const joint of jointsToDestroy) {
-    // if (!joint) return
     world.destroyJoint(joint)
   }
   jointsToDestroy.length = 0
@@ -472,7 +462,7 @@ function jointDestroyHandler() {
 
 function ballChangeFrame() {
   if (ballAnimationDisabled === true) return
-  // setInterval(() => {
+
   for (let ballId in ballList) {
     if (!ballList[ballId]) {
       return
@@ -480,7 +470,6 @@ function ballChangeFrame() {
     const velocityX = ballList[ballId].getLinearVelocity().x
     const isPickedUp = ballIsPickedUp[ballId]
     if (Math.abs(velocityX) > 0.1 && isPickedUp !== true) {
-      // HERE
       let currentIndex = ballFrameIndex[ballId]
       let nextIndex = currentIndex + 1
       if (nextIndex > ballFrameList[ballId].length - 1) {
@@ -489,7 +478,6 @@ function ballChangeFrame() {
       ballFrameIndex[ballId] = nextIndex
     }
   }
-  // }, 100)
 }
 
 let ballAnimationDisabled = false
@@ -550,7 +538,6 @@ function checkIfBallBounds() {
 }
 
 // Ball spawning
-
 function spawnBall(
   x,
   y,
@@ -690,7 +677,7 @@ function spawnHoop(side, distance = 14.4, height = 0, width = 0) {
   })
 
   const hoopTarget = world.createBody(
-    Vec2(direction * (HOOP_DISTANCE - 3.9) + width/2, 8 + RAISE + height)
+    Vec2(direction * (HOOP_DISTANCE - 3.9) + width / 2, 8 + RAISE + height)
   )
   hoopTarget.createFixture(pl.Box(0.5, 0.5), {
     restitution: 0.5,
@@ -755,6 +742,7 @@ function spawnPlayer(
   reach = 1.8,
   armSize = 1.2,
   armWidth = 0.3,
+  headSize = [0.35, 0.4],
   feetFriction = 2,
   armAttachedTextures,
   headAttachedTextures,
@@ -798,9 +786,9 @@ function spawnPlayer(
   })
   // Head
   const head = world.createDynamicBody(
-    Vec2(x - 0.15 * side, 4.9 + RAISE - 0.9 + y)
+    Vec2(x - 0.15 * side, 4.9 + RAISE - 0.9 + y -0.2 + headSize[1]/2)
   )
-  head.createFixture(pl.Box(0.35, 0.4), {
+  head.createFixture(pl.Box(headSize[0], headSize[1]), {
     density: 0.2,
     friction: 0.3,
     restitution: 0.5,
@@ -948,10 +936,10 @@ function pointArmRightDown(arm, targetAngle = 0, stiffness = 4, damping = 0.5) {
 function renderImage(image, flip, body, xOffset, yOffset, xScale, yScale) {
   if (!body) return
 
-  xOffset = xOffset * SCALE/50
-  yOffset = yOffset * SCALE/50
-  xScale = xScale * SCALE/50
-  yScale = yScale * SCALE/50
+  xOffset = (xOffset * SCALE) / 50
+  yOffset = (yOffset * SCALE) / 50
+  xScale = (xScale * SCALE) / 50
+  yScale = (yScale * SCALE) / 50
 
   const pos = body.getPosition()
   const angle = body.getAngle()
@@ -991,6 +979,10 @@ function renderHead(id) {
     let [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
 
     renderImage(image, flip, head, xOffset, yOffset, xScale, yScale)
+  }
+
+  if (DEV_RENDER) {
+    renderBox(head)
   }
 }
 
@@ -1122,7 +1114,7 @@ function renderHoopNetRight() {
 
 function hoopLeftHandler() {
   let width = hoopLeft["width"]
-  offsetBody(hoopLeft["2"], hoopLeft["net"], Vec2(3 + width/2, -1.1))
+  offsetBody(hoopLeft["2"], hoopLeft["net"], Vec2(3 + width / 2, -1.1))
   offsetBody(hoopLeft["2"], hoopLeft["3"], Vec2(1.4, 1.4))
   offsetBody(hoopLeft["2"], hoopLeft["4"], Vec2(1.8, -0.15))
   offsetBody(hoopLeft["2"], hoopLeft["5"], Vec2(3.85 + width, -0.15))
@@ -1130,7 +1122,7 @@ function hoopLeftHandler() {
 
 function hoopRightHandler() {
   let width = hoopRight["width"]
-  offsetBody(hoopRight["2"], hoopRight["net"], Vec2(-3 + width/2, -1.1))
+  offsetBody(hoopRight["2"], hoopRight["net"], Vec2(-3 + width / 2, -1.1))
   offsetBody(hoopRight["2"], hoopRight["3"], Vec2(-1.4, 1.4))
   offsetBody(hoopRight["2"], hoopRight["4"], Vec2(-1.8, -0.15))
   offsetBody(hoopRight["2"], hoopRight["5"], Vec2(-3.85 + width, -0.15))

@@ -735,6 +735,7 @@ function spawnPlayer(side, x, y, id, armSize, outfitIndex, snow) {
       id: id,
       team: 2,
       armSize: armSize,
+      headSize: [0.35, 1],
       feetFriction: feetFriction,
       armAttachedTextures: [[armRightImage, armOffsetInfo]],
       headAttachedTextures: [

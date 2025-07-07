@@ -143,6 +143,7 @@ function engineSpawnPlayer(data) {
     id: data.id,
     team: 2,
     armSize: data.armSize,
+    headSize: data.headSize,
     feetFriction: data.feetFriction,
     armAttachedTextures: data.armAttachedTextures,
     headAttachedTextures: data.headAttachedTextures,
