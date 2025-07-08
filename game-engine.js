@@ -60,7 +60,7 @@ let SIMULATION_SPEED = 1 / 60
 
 const RAISE = 4.5
 
-const DEV_RENDER = true
+const DEV_RENDER = false
 
 let orders = {}
 
@@ -217,6 +217,8 @@ GameEngine.on(
     armSize,
     armWidth,
     headSize,
+    headLowerAngle,
+    headUpperAngle,
     feetFriction,
     armAttachedTextures,
     headAttachedTextures,
@@ -232,6 +234,8 @@ GameEngine.on(
       armSize,
       armWidth,
       headSize,
+      headLowerAngle,
+      headUpperAngle,
       feetFriction,
       armAttachedTextures,
       headAttachedTextures,
@@ -743,11 +747,15 @@ function spawnPlayer(
   armSize = 1.2,
   armWidth = 0.3,
   headSize = [0.35, 0.4],
+  headLowerAngle = -0.25,
+  headUpperAngle = 0.25,
   feetFriction = 2,
   armAttachedTextures,
   headAttachedTextures,
   bodyAttachedTextures
 ) {
+  console.log(headLowerAngle)
+
   playerTeam[id] = team
 
   if (side === "left") {
@@ -786,7 +794,10 @@ function spawnPlayer(
   })
   // Head
   const head = world.createDynamicBody(
-    Vec2(x - 0.15 * side, 4.9 + RAISE - 0.9 + y -0.2 + headSize[1]/2)
+    Vec2(
+      x - (0.325 - headSize[0] / 2) * side,
+      4.9 + RAISE - 0.9 + y - 0.2 + headSize[1] / 2
+    )
   )
   head.createFixture(pl.Box(headSize[0], headSize[1]), {
     density: 0.2,
@@ -868,17 +879,21 @@ function spawnPlayer(
 
   // Connects head and body
 
+  if (side === 1) {
+    ;[headLowerAngle, headUpperAngle] = [-headUpperAngle, -headLowerAngle]
+  }
+
   let headBodyJoint = world.createJoint(
     pl.RevoluteJoint(
       {
         collideConnected: false,
         enableLimit: true,
-        lowerAngle: -0.25,
-        upperAngle: 0.25,
+        lowerAngle: headLowerAngle,
+        upperAngle: headUpperAngle,
       },
       head,
       body,
-      Vec2(x - 0.1 * side, 4.4 + RAISE + y - 0.9)
+      Vec2(x - (0.275 - headSize[0] / 2) * side, 4.4 + RAISE + y - 0.9)
     )
   )
 
@@ -981,7 +996,8 @@ function renderHead(id) {
     renderImage(image, flip, head, xOffset, yOffset, xScale, yScale)
   }
 
-  if (DEV_RENDER) {
+  // console.log(1)
+  if (DEV_RENDER === true) {
     renderBox(head)
   }
 }

@@ -144,6 +144,8 @@ function engineSpawnPlayer(data) {
     team: 2,
     armSize: data.armSize,
     headSize: data.headSize,
+    headLowerAngle: data.headLowerAngle,
+    headUpperAngle: data.headUpperAngle,
     feetFriction: data.feetFriction,
     armAttachedTextures: data.armAttachedTextures,
     headAttachedTextures: data.headAttachedTextures,
