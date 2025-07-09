@@ -31,6 +31,7 @@ THE SOFTWARE.
 let playerBalanceAngleList = {}
 let disableBalancing = {}
 let raiseArm = {} // id, true/false
+
 let ballList = {} // id, body
 let ballSizeList = {} // id, size:num
 let ballFrameList = {}
@@ -38,6 +39,9 @@ let ballFrameIndex = {}
 let ballDensityList = {} // id, density: num
 let ballIsPickedUp = {} // ballId, true/false
 let ballPickedUpPlayer = {} // ballId, playerId
+let ballOut = {} // ballId, value
+let ballAnimationDisabled = false
+
 let playerPickedUpBall = {} // playerId, ballId
 let playerIsPickedUpBall = {} // playerId, true/false
 let playerBallReach = {} // playerId, reach:num
@@ -47,31 +51,25 @@ let playerList = {} // id, [feet, body, head, arm, hand, headHitbox]
 let playerJointList = {} // id, [feetBodyJoint, headHitboxBodyJoint, headBodyJoint, armBodyJoint, armHandJoint]
 let playerSideList = {} // id, "normal"/"flip"
 let playerFeetList = {} // playerId, body
+let playerTeam = {} // playerId, teamId
 let armSizeList = {} // id, size: num
 let textureList = {} // id, [armAttachedTextures, headAttachedTextures, bodyAttachedTextures]
-let playerTeam = {} // playerId, teamId
-
-// let playerShadows = {} // playerId, shadow
 
 // Engine and canvas setup
 
 let SCALE = 100
 let SIMULATION_SPEED = 1 / 60
 
-const RAISE = 4.5
+let RAISE = 4.5
 
-const DEV_RENDER = false
+let DEV_RENDER = false
 
 let orders = {}
 
 const canvas = document.getElementById("canvas")
-const div = document.querySelector("div")
 
 const ctx = canvas.getContext("2d")
 ctx.imageSmoothingEnabled = false
-
-// ctx.imageSmoothingEnabled = true
-// ctx.imageSmoothingQuality = "high"
 
 ctx.webkitImageSmoothingEnabled = false
 ctx.mozImageSmoothingEnabled = false
@@ -80,14 +78,11 @@ ctx.msImageSmoothingEnabled = false
 canvas.width = "4000"
 canvas.height = "2000"
 
-// import planck from 'planck-js'
-// import planck from 'https://unpkg.com/planck-js@latest/dist/planck.mjs'
 const pl = planck
 const Vec2 = pl.Vec2
 const world = new pl.World(Vec2(0, -15))
 
 function updateProperty(property, value) {
-  // GameEngine.emit("updateProperty", { property: property, value: value })
   window.postMessage(
     {
       source: "game-engine",
@@ -245,7 +240,7 @@ GameEngine.on(
 )
 
 function getImage(source) {
-  let image = new Image()
+  const image = new Image()
   image.src = source
   return image
 }
@@ -258,51 +253,48 @@ GameEngine.on(
 )
 
 GameEngine.on("jump", ({ power, xOffset, rotation, ids }) => {
-  for (let id of ids) {
-    if (!playerList[id]) {
+  for (const playerId of ids) {
+    if (!playerList[playerId]) {
       return
     }
-    let [feet, body, head, arm, hand] = playerList[id]
+    const [feet, body, head, arm, hand] = playerList[playerId]
     jump(body, feet, power, xOffset, rotation)
-    disableBalancing[id] = true
+    disableBalancing[playerId] = true
     setTimeout(() => {
-      disableBalancing[id] = false
+      disableBalancing[playerId] = false
     }, 200)
-    playerAirborne[id] = true
+    playerAirborne[playerId] = true
   }
 })
 
 GameEngine.on("stopJump", ({ ids }) => {
-  for (let id of ids) {
-    if (!playerList[id]) {
+  for (const playerId of ids) {
+    if (!playerList[playerId]) {
       return
     }
-    let [feet, body, head, arm, hand] = playerList[id]
-    disableBalancing[id] = false
-    // releaseBall(id)
-    // raiseArm[id] = false
+    disableBalancing[playerId] = false
   }
 })
 
 GameEngine.on("raiseArm", ({ ids, value }) => {
-  for (let id of ids) {
-    raiseArm[id] = value
+  for (const playerId of ids) {
+    raiseArm[playerId] = value
   }
 })
 
 GameEngine.on("playerPickingUpDisabled", ({ ids, value }) => {
-  for (let id of ids) {
-    raiseArm[id] = value
+  for (const playerId of ids) {
+    raiseArm[playerId] = value
   }
 })
 
 GameEngine.on(
   "throwBall",
   ({ ids, targetPosition, targetXOffset, throttle, maxHeight }) => {
-    for (let id of ids) {
-      if (playerIsPickedUpBall[id] === true) {
+    for (const playerId of ids) {
+      if (playerIsPickedUpBall[playerId] === true) {
         throwBall(
-          playerPickedUpBall[id],
+          playerPickedUpBall[playerId],
           targetPosition,
           targetXOffset,
           throttle,
@@ -341,10 +333,10 @@ function getProperty(property, value) {
 
 function changeProperty(property, value) {
   if (property === "balanceAngle") {
-    const id = value[0]
+    const playerId = value[0]
     const angle = value[1]
 
-    playerBalanceAngleList[id] = angle
+    playerBalanceAngleList[playerId] = angle
   } else if (property === "scale") {
     SCALE = value
   } else if (property === "gravity") {
@@ -365,11 +357,11 @@ function changeProperty(property, value) {
 
 // Body destroying
 
-let bodiesToDestroy = []
-let jointsToDestroy = []
+const bodiesToDestroy = []
+const jointsToDestroy = []
 
-let playersToKill = []
-let ballsToKill = []
+const playersToKill = []
+const ballsToKill = []
 
 GameEngine.on("killPlayer", ({ id }) => {
   KillPlayer(id)
@@ -380,52 +372,52 @@ GameEngine.on("killAllPlayers", ({}) => {
 })
 
 function killHandler() {
-  for (const id of playersToKill) {
-    playerList[id] = null
+  for (const playerId of playersToKill) {
+    playerList[playerId] = null
 
-    playerIsPickedUpBall[id] = null
-    playerBallReach[id] = null
-    playerBalanceAngleList[id] = null
-    playerPickedUpBall[id] = null
-    playerAirborne[id] = null
-    playerIsPickedUpBall[id] = null
-    playerTeam[id] = null
-    playerSideList[id] = null
-    playerFeetList[id] = null
-    isPlayerPickingUpDisabled[id] = null
+    playerIsPickedUpBall[playerId] = null
+    playerBallReach[playerId] = null
+    playerBalanceAngleList[playerId] = null
+    playerPickedUpBall[playerId] = null
+    playerAirborne[playerId] = null
+    playerIsPickedUpBall[playerId] = null
+    playerTeam[playerId] = null
+    playerSideList[playerId] = null
+    playerFeetList[playerId] = null
+    isPlayerPickingUpDisabled[playerId] = null
   }
   playersToKill.length = 0
 
-  for (const id of ballsToKill) {
-    ballList[id] = null
+  for (const ballId of ballsToKill) {
+    ballList[ballId] = null
 
-    ballOut[id] = null
-    ballDensityList[id] = null
-    ballFrameIndex[id] = null
-    ballFrameList[id] = null
-    ballIsPickedUp[id] = null
-    ballPickedUpPlayer[id] = null
+    ballOut[ballId] = null
+    ballDensityList[ballId] = null
+    ballFrameIndex[ballId] = null
+    ballFrameList[ballId] = null
+    ballIsPickedUp[ballId] = null
+    ballPickedUpPlayer[ballId] = null
   }
   ballsToKill.length = 0
 }
 
-function KillPlayer(id) {
-  for (let index in playerList[id]) {
-    bodiesToDestroy.push(playerList[id][index])
+function KillPlayer(playerId) {
+  for (const index in playerList[playerId]) {
+    bodiesToDestroy.push(playerList[playerId][index])
   }
 
-  playersToKill.push(id)
+  playersToKill.push(playerId)
 
-  for (let index in playerJointList[id]) {
-    jointsToDestroy.push(playerJointList[id][index])
+  for (const index in playerJointList[playerId]) {
+    jointsToDestroy.push(playerJointList[playerId][index])
   }
 
-  playerJointList[id] = null
+  playerJointList[playerId] = null
 }
 
 function KillAllPlayers() {
-  for (let id in playerList) {
-    KillPlayer(id)
+  for (const playerId in playerList) {
+    KillPlayer(playerId)
   }
 }
 
@@ -443,8 +435,8 @@ function KillBall(id) {
 }
 
 function KillAllBalls() {
-  for (let id in ballList) {
-    KillBall(id)
+  for (const ballId in ballList) {
+    KillBall(ballId)
   }
 }
 
@@ -467,15 +459,14 @@ function jointDestroyHandler() {
 function ballChangeFrame() {
   if (ballAnimationDisabled === true) return
 
-  for (let ballId in ballList) {
+  for (const ballId in ballList) {
     if (!ballList[ballId]) {
       return
     }
     const velocityX = ballList[ballId].getLinearVelocity().x
     const isPickedUp = ballIsPickedUp[ballId]
     if (Math.abs(velocityX) > 0.1 && isPickedUp !== true) {
-      let currentIndex = ballFrameIndex[ballId]
-      let nextIndex = currentIndex + 1
+      let nextIndex = ballFrameIndex[ballId] + 1
       if (nextIndex > ballFrameList[ballId].length - 1) {
         nextIndex = 0
       }
@@ -483,8 +474,6 @@ function ballChangeFrame() {
     }
   }
 }
-
-let ballAnimationDisabled = false
 
 let ballIntervalId
 let currentBallInterval = 100
@@ -501,15 +490,13 @@ function changeBallInterval(newInterval) {
 
 startBallInterval()
 
-let ballOut = {} // ballId, value
-
 function checkIfBallBounds() {
-  for (let ballId in ballList) {
-    let ball = ballList[ballId]
+  for (const ballId in ballList) {
+    const ball = ballList[ballId]
 
     if (!ball) return
 
-    let positionX = ball.getPosition().x
+    const positionX = ball.getPosition().x
 
     if (ballOut[ballId] === true) {
       return
@@ -583,8 +570,8 @@ GameEngine.on("spawnHoop", ({ side, distance, height, width }) => {
 })
 
 function destroyLeftHoop() {
-  for (let index in hoopLeft) {
-    let object = hoopLeft[index]
+  for (const index in hoopLeft) {
+    const object = hoopLeft[index]
     if (
       typeof object.getType === "function" &&
       typeof object.getPosition === "function"
@@ -602,8 +589,8 @@ function destroyLeftHoop() {
 }
 
 function destroyRightHoop() {
-  for (let index in hoopRight) {
-    let object = hoopRight[index]
+  for (const index in hoopRight) {
+    const object = hoopRight[index]
     if (
       typeof object.getType === "function" &&
       typeof object.getPosition === "function"
@@ -851,7 +838,7 @@ function spawnPlayer(
 
   // Connects feet and body
 
-  let feetBodyJoint = world.createJoint(
+  const feetBodyJoint = world.createJoint(
     pl.WeldJoint(
       {
         collideConnected: false,
@@ -865,7 +852,7 @@ function spawnPlayer(
 
   // Connects head hitbox and body
 
-  let headHitboxBodyJoint = world.createJoint(
+  const headHitboxBodyJoint = world.createJoint(
     pl.WeldJoint(
       {
         collideConnected: false,
@@ -883,7 +870,7 @@ function spawnPlayer(
     ;[headLowerAngle, headUpperAngle] = [-headUpperAngle, -headLowerAngle]
   }
 
-  let headBodyJoint = world.createJoint(
+  const headBodyJoint = world.createJoint(
     pl.RevoluteJoint(
       {
         collideConnected: false,
@@ -899,7 +886,7 @@ function spawnPlayer(
 
   // Connects arm and body
 
-  let armBodyJoint = world.createJoint(
+  const armBodyJoint = world.createJoint(
     pl.RevoluteJoint(
       {
         collideConnected: false,
@@ -913,7 +900,7 @@ function spawnPlayer(
 
   // Connects arm and hand
 
-  let armHandJoint = world.createJoint(
+  const armHandJoint = world.createJoint(
     pl.WeldJoint(
       {
         collideConnected: false,
@@ -979,60 +966,56 @@ function renderImage(image, flip, body, xOffset, yOffset, xScale, yScale) {
   ctx.restore()
 }
 
-function renderHead(id) {
-  let [armAttachedTextures, headAttachedTextures, bodyAttachedTextures] =
-    textureList[id]
-  let [feet, body, head, arm] = playerList[id]
+function renderHead(playerId) {
+  const headAttachedTextures = textureList[playerId][1]
+  const head = playerList[playerId][2]
 
   let flip = false
-  if (playerSideList[id] === "flip") {
+  if (playerSideList[playerId] === "flip") {
     flip = true
   }
 
-  for (let index in headAttachedTextures) {
-    let textureInfo = headAttachedTextures[index]
-    let [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
+  for (const index in headAttachedTextures) {
+    const textureInfo = headAttachedTextures[index]
+    const [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
 
     renderImage(image, flip, head, xOffset, yOffset, xScale, yScale)
   }
 
-  // console.log(1)
   if (DEV_RENDER === true) {
     renderBox(head)
   }
 }
 
-function renderBody(id) {
-  let [armAttachedTextures, headAttachedTextures, bodyAttachedTextures] =
-    textureList[id]
-  let [feet, body, head, arm] = playerList[id]
+function renderBody(playerId) {
+  const bodyAttachedTextures = textureList[playerId][2]
+  const body = playerList[playerId][1]
 
   let flip = false
-  if (playerSideList[id] === "flip") {
+  if (playerSideList[playerId] === "flip") {
     flip = true
   }
 
-  for (let index in bodyAttachedTextures) {
-    let textureInfo = bodyAttachedTextures[index]
-    let [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
+  for (const index in bodyAttachedTextures) {
+    const textureInfo = bodyAttachedTextures[index]
+    const [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
 
     renderImage(image, flip, body, xOffset, yOffset, xScale, yScale)
   }
 }
 
-function renderArm(id) {
-  let [armAttachedTextures, headAttachedTextures, bodyAttachedTextures] =
-    textureList[id]
-  let [feet, body, head, arm] = playerList[id]
+function renderArm(playerId) {
+  const armAttachedTextures = textureList[playerId][0]
+  const arm = playerList[playerId][3]
 
   let flip = false
-  if (playerSideList[id] === "flip") {
+  if (playerSideList[playerId] === "flip") {
     flip = true
   }
 
-  for (let index in armAttachedTextures) {
-    let textureInfo = armAttachedTextures[index]
-    let [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
+  for (const index in armAttachedTextures) {
+    const textureInfo = armAttachedTextures[index]
+    const [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
 
     renderImage(image, flip, arm, xOffset, yOffset, xScale, yScale)
   }
@@ -1047,29 +1030,29 @@ function renderBall(ball, size, frameList, frameIndex) {
 }
 
 function renderBalls() {
-  for (let id in ballList) {
-    if (ballIsPickedUp[id] === true) {
+  for (const ballId in ballList) {
+    if (ballIsPickedUp[ballId] === true) {
       return
     }
     renderBall(
-      ballList[id],
-      ballSizeList[id],
-      ballFrameList[id],
-      ballFrameIndex[id]
+      ballList[ballId],
+      ballSizeList[ballId],
+      ballFrameList[ballId],
+      ballFrameIndex[ballId]
     )
   }
 }
 
 function renderBallsPickedUp() {
-  for (const id in ballIsPickedUp) {
-    const value = ballIsPickedUp[id]
+  for (const ballId in ballIsPickedUp) {
+    const value = ballIsPickedUp[ballId]
 
     if (value === true) {
       renderBall(
-        ballList[id],
-        ballSizeList[id],
-        ballFrameList[id],
-        ballFrameIndex[id]
+        ballList[ballId],
+        ballSizeList[ballId],
+        ballFrameList[ballId],
+        ballFrameIndex[ballId]
       )
     }
   }
@@ -1129,7 +1112,7 @@ function renderHoopNetRight() {
 }
 
 function hoopLeftHandler() {
-  let width = hoopLeft["width"]
+  const width = hoopLeft["width"]
   offsetBody(hoopLeft["2"], hoopLeft["net"], Vec2(3 + width / 2, -1.1))
   offsetBody(hoopLeft["2"], hoopLeft["3"], Vec2(1.4, 1.4))
   offsetBody(hoopLeft["2"], hoopLeft["4"], Vec2(1.8, -0.15))
@@ -1137,7 +1120,7 @@ function hoopLeftHandler() {
 }
 
 function hoopRightHandler() {
-  let width = hoopRight["width"]
+  const width = hoopRight["width"]
   offsetBody(hoopRight["2"], hoopRight["net"], Vec2(-3 + width / 2, -1.1))
   offsetBody(hoopRight["2"], hoopRight["3"], Vec2(-1.4, 1.4))
   offsetBody(hoopRight["2"], hoopRight["4"], Vec2(-1.8, -0.15))
@@ -1245,22 +1228,6 @@ function renderHoopRightBack() {
 }
 
 // For testing
-function renderSphere(sphere, color) {
-  const pos = sphere.getPosition()
-  const canvasPos = toCanvas(pos)
-  ctx.beginPath()
-  ctx.arc(
-    canvasPos.x,
-    canvasPos.y,
-    sphere.getFixtureList().getShape().m_radius * SCALE,
-    0,
-    2 * Math.PI
-  )
-  ctx.fillStyle = color
-  ctx.fill()
-}
-
-// For testing
 function renderBox(part, color) {
   if (!part) return
 
@@ -1284,8 +1251,8 @@ function renderBox(part, color) {
 
   ctx.beginPath()
   ctx.moveTo(vertices[0].x, vertices[0].y)
-  for (let i = 1; i < vertices.length; i++) {
-    ctx.lineTo(vertices[i].x, vertices[i].y)
+  for (const index = 1; index < vertices.length; index++) {
+    ctx.lineTo(vertices[index].x, vertices[index].y)
   }
   ctx.closePath()
   ctx.fill()
@@ -1294,8 +1261,8 @@ function renderBox(part, color) {
 }
 
 function render() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
-  simulate()
+//   ctx.clearRect(0, 0, canvas.width, canvas.height)
+//   simulate()
 }
 
 function toCanvas(pos) {
@@ -1331,30 +1298,29 @@ function renderShadow(
 }
 
 function renderShadows() {
-  for (let playerId in playerList) {
+  for (const playerId in playerList) {
     if (!playerList[playerId]) {
       return
     }
-    let [feet, body, head, arm, hand] = playerList[playerId]
-    let positionX = feet.getPosition().x
-    let positionY = feet.getPosition().y
-    let size = 0.9 - 0.07 * (positionY - RAISE - 0.5)
+    const feet = playerList[playerId][0]
+    const positionX = feet.getPosition().x
+    const positionY = feet.getPosition().y
+    const size = 0.9 - 0.07 * (positionY - RAISE - 0.5)
     renderShadow(positionX, RAISE + 0.1, size, 0.15)
   }
-  for (let ballId in ballList) {
-    let ball = ballList[ballId]
-    let positionX = ball.getPosition().x
-    let positionY = ball.getPosition().y
+  for (const ballId in ballList) {
+    const ball = ballList[ballId]
+    const positionX = ball.getPosition().x
+    const positionY = ball.getPosition().y
 
-    let size = 0.6 - 0.07 * Math.min(5, positionY - RAISE - 0.5)
+    const size = 0.6 - 0.07 * Math.min(5, positionY - RAISE - 0.5)
     renderShadow(positionX, RAISE + 0.1, size, 0.15)
   }
 }
 
 function areBodiesTouching(bodyA, bodyB) {
-  if (!bodyA || !bodyB) {
-    return
-  }
+  if (!bodyA || !bodyB) return
+  
   for (
     let contact = world.getContactList();
     contact;
@@ -1383,8 +1349,8 @@ let ballLeftTop = false
 let ballLeftBottom = false
 
 function scoreLeftHandler() {
-  let top = areBodiesTouching(ballList[1], hoopLeft["target"])
-  let bottom = areBodiesTouching(ballList[1], hoopLeft["net"])
+  const top = areBodiesTouching(ballList[1], hoopLeft["target"])
+  const bottom = areBodiesTouching(ballList[1], hoopLeft["net"])
 
   if (top === true && ballLeftBottom === false) {
     ballLeftTop = true
@@ -1418,8 +1384,8 @@ let ballRightTop = false
 let ballRightBottom = false
 
 function scoreRightHandler() {
-  let top = areBodiesTouching(ballList[1], hoopRight["target"])
-  let bottom = areBodiesTouching(ballList[1], hoopRight["net"])
+  const top = areBodiesTouching(ballList[1], hoopRight["target"])
+  const bottom = areBodiesTouching(ballList[1], hoopRight["net"])
 
   if (top === true && ballRightBottom === false) {
     ballRightTop = true
@@ -1476,32 +1442,31 @@ function simulate() {
   renderHoopLeftTop()
   renderHoopRightTop()
 
-  for (let id in playerList) {
-    if (!playerList[id]) {
+  for (const playerId in playerList) {
+    if (!playerList[playerId]) {
       return
     }
-    let [feet, body, head, arm] = playerList[id]
+    const [feet, body, head, arm] = playerList[playerId]
     // ACTION FUNCTIONS
-    balance(id, feet, body, playerBalanceAngleList[id])
+    balance(playerId, feet, body, playerBalanceAngleList[playerId])
     ballHandler()
     armHandler()
 
     // RENDER FUNCTIONS
-
-    renderHead(id)
-    renderBody(id)
+    renderHead(playerId)
+    renderBody(playerId)
   }
 
   renderBallsPickedUp()
 
-  for (let [id, [feet, body, head, arm]] of Object.entries(playerList)) {
-    renderArm(id)
+  for (const playerId in playerList) {
+    renderArm(playerId)
   }
 }
 
 function updateProperties() {
-  let playerAngleList = {}
-  for (let playerId in playerList) {
+  const playerAngleList = {}
+  for (const playerId in playerList) {
     playerAngleList[playerId] = getPlayerAngle(playerId)
   }
 
@@ -1552,7 +1517,9 @@ function step() {
   jointDestroyHandler()
   killHandler()
 
-  render()
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  simulate()
+
   requestAnimationFrame(step)
 
   updateProperties()
@@ -1577,7 +1544,7 @@ function pointArmUp(
   const angularVelocity = arm.getAngularVelocity()
 
   const angleError = targetAngle - currentAngle
-  let torque = stiffness * angleError - damping * angularVelocity
+  const torque = stiffness * angleError - damping * angularVelocity
 
   arm.applyTorque(torque)
 }
@@ -1592,12 +1559,9 @@ function throwBall(
   const ball = ballList[ballId]
   const playerId = ballPickedUpPlayer[ballId]
 
-  let endPos = {
-    x: targetPos[0] + targetXOffset,
-    y: targetPos[1],
-  }
-  let startPos = { x: ball.getPosition().x, y: ball.getPosition().y }
-  let velocity = computeThrowVelocity(startPos, endPos, maxHeight)
+  const endPosition = [targetPos[0] + targetXOffset, targetPos[1]]
+  const startPosition = [ball.getPosition().x, ball.getPosition().y]
+  const velocity = computeThrowVelocity(startPosition, endPosition, maxHeight)
 
   velocity = Vec2(velocity.x * throttle, velocity.y * throttle)
 
@@ -1621,7 +1585,7 @@ function throwBall(
 }
 
 function pickUpBall(ball, hand) {
-  let position = hand.getPosition()
+  const position = hand.getPosition()
   ball.setPosition(Vec2(position.x, position.y))
 
   ball.getFixtureList().setDensity(0)
@@ -1632,10 +1596,10 @@ function pickUpBall(ball, hand) {
 }
 
 function computeThrowVelocity(startPos, endPos, hMax, gravity = 15) {
-  const x0 = startPos.x
-  const y0 = startPos.y
-  const x1 = endPos.x
-  const y1 = endPos.y
+  const x0 = startPos[0]
+  const y0 = startPos[1]
+  const x1 = endPos[0]
+  const y1 = endPos[1]
 
   const vy = Math.sqrt(2 * gravity * (hMax - y0))
   const tUp = vy / gravity
@@ -1647,7 +1611,7 @@ function computeThrowVelocity(startPos, endPos, hMax, gravity = 15) {
 }
 
 function ballSpeedHandler() {
-  for (let ballId in ballList) {
+  for (const ballId in ballList) {
     const ball = ballList[ballId]
     if (!ball) {
       return
@@ -1662,26 +1626,25 @@ function ballSpeedHandler() {
 }
 
 function ballHandler() {
-  for (let ballId in ballList) {
-    let ball = ballList[ballId]
+  for (const ballId in ballList) {
+    const ball = ballList[ballId]
 
     if (ballIsPickedUp[ballId] === true) {
       const playerId = ballPickedUpPlayer[ballId]
       if (!playerId) {
         return
       }
-
-      let [feet, body, head, arm, hand] = playerList[playerId]
-      let position = hand.getPosition()
+      const hand = playerList[playerId][4]
+      const position = hand.getPosition()
       ball.setPosition(Vec2(position.x, position.y))
     }
 
-    for (let playerId in playerList) {
-      let [feet, body, head, arm, hand] = playerList[playerId]
-      let handPosition = hand.getPosition()
-      let ballPosition = ball.getPosition()
+    for (const playerId in playerList) {
+      const hand = playerList[playerId][4]
+      const handPosition = hand.getPosition()
+      const ballPosition = ball.getPosition()
 
-      let distance = Math.sqrt(
+      const distance = Math.sqrt(
         (handPosition.x - ballPosition.x) ** 2 +
           (handPosition.y - ballPosition.y) ** 2
       )
@@ -1706,8 +1669,8 @@ function ballHandler() {
 }
 
 function setTeamPickingUp(playerId, value) {
-  let wantedTeam = playerTeam[playerId]
-  for (let [playerId, team] of Object.entries(playerTeam)) {
+  const wantedTeam = playerTeam[playerId]
+  for (const [playerId, team] of Object.entries(playerTeam)) {
     if (team === wantedTeam) {
       isPlayerPickingUpDisabled[playerId] = value
     }
@@ -1715,13 +1678,13 @@ function setTeamPickingUp(playerId, value) {
 }
 
 function armHandler() {
-  for (const id in playerList) {
-    const value = raiseArm[id]
-    const [feet, body, head, arm, hand] = playerList[id]
+  for (const playerId in playerList) {
+    const value = raiseArm[playerId]
+    const arm = playerList[playerId][3]
 
     let flip = false
 
-    if (playerSideList[id] === "flip") {
+    if (playerSideList[playerId] === "flip") {
       flip = true
     }
 
@@ -1776,18 +1739,17 @@ function jump(body, feet, force, xOffset, rotation = 0) {
   body.setAngularVelocity(rotation)
 }
 
-function getPlayerAngle(id) {
-  if (!playerList[id]) {
+function getPlayerAngle(playerId) {
+  if (!playerList[playerId]) {
     return
   }
-  const [feet, body, head, arm, hand] = playerList[id]
+  const body = playerList[playerId][1]
   return body.c_position.a
 }
 
 function rotatePlayer(ids, rotation) {
-  for (let index in ids) {
-    let id = ids[index]
-    let [feet, body, head, arm, hand] = playerList[id]
+  for (const playerId of ids) {
+    const body = playerList[playerId][1]
 
     const force = planck.Vec2(rotation, 0)
     const point = body.getWorldPoint(planck.Vec2(0, 1))
@@ -1796,8 +1758,8 @@ function rotatePlayer(ids, rotation) {
   }
 }
 
-function rotateBall(id, rotation) {
-  let ball = ballList[id]
+function rotateBall(ballId, rotation) {
+  const ball = ballList[ballId]
   ball.setAngularVelocity(rotation)
 }
 
@@ -1822,18 +1784,18 @@ world.on("begin-contact", (contact) => {
     hoopRight["target"],
   ]
 
-  let isHoopLeft =
+  const isHoopLeft =
     hoopLeftBodies.includes(bodyA) || hoopLeftBodies.includes(bodyB)
-  let isHoopRight =
+  const isHoopRight =
     hoopRightBodies.includes(bodyA) || hoopRightBodies.includes(bodyB)
-  let isGround = ground === bodyA || ground === bodyB
+  const isGround = ground === bodyA || ground === bodyB
 
   let isBall = false
   let isFeet = false
   let feetPlayerId = null
 
-  for (let ballId in ballList) {
-    let ball = ballList[ballId]
+  for (const ballId in ballList) {
+    const ball = ballList[ballId]
     if (ballIsPickedUp[ballId]) {
       break
     }
@@ -1842,8 +1804,8 @@ world.on("begin-contact", (contact) => {
     }
   }
 
-  for (let playerId in playerFeetList) {
-    let feet = playerFeetList[playerId]
+  for (const playerId in playerFeetList) {
+    const feet = playerFeetList[playerId]
     if (feet === bodyA || feet === bodyB) {
       isFeet = true
       feetPlayerId = playerId
@@ -1881,17 +1843,6 @@ world.on("begin-contact", (contact) => {
   }
 })
 
-function testingGetBodyCount() {
-  let bodyCount = 0
-  for (let body = world.getBodyList(); body; body = body.getNext()) {
-    bodyCount++
-  }
-
-  console.log("body count:", bodyCount)
-}
-
-step()
-
 GameEngine.on("changeTexture", ({ name, textureInfo }) => {
   changeTexture(name, textureInfo)
 })
@@ -1903,3 +1854,7 @@ GameEngine.on("tiltHoop", ({ side, angle }) => {
     hoopRight["joint"].setLimits(angle, 0)
   }
 })
+
+// Game loop
+
+step()
