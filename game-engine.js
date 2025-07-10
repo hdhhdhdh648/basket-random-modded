@@ -741,7 +741,21 @@ function spawnPlayer(
   headAttachedTextures,
   bodyAttachedTextures
 ) {
-  console.log(headLowerAngle)
+
+  // Errors
+  if (typeof(id) !== "number") {
+    console.error('spawnPlayer: "id" argument must be a number.')
+    return
+  }
+  if (typeof(x) !== "number" || typeof(y) !== "number") {
+    console.error('spawnPlayer: "x" and "y" arguments have to be numbers.')
+    return
+  }
+
+  // Warnings
+  if (side !== "left" && side !== "right") {
+    console.warn('spawnPlayer: "side" argument not specified.')
+  }
 
   playerTeam[id] = team
 
@@ -936,7 +950,7 @@ function pointArmRightDown(arm, targetAngle = 0, stiffness = 4, damping = 0.5) {
 // Render functions
 
 function renderImage(image, flip, body, xOffset, yOffset, xScale, yScale) {
-  if (!body) return
+  if (!body || !image) return
 
   xOffset = (xOffset * SCALE) / 50
   yOffset = (yOffset * SCALE) / 50
@@ -978,8 +992,6 @@ function renderHead(playerId) {
   for (const index in headAttachedTextures) {
     const textureInfo = headAttachedTextures[index]
     const [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
-
-    // console.log(image.src)
 
     renderImage(image, flip, head, xOffset, yOffset, xScale, yScale)
   }

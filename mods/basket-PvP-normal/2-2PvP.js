@@ -133,6 +133,9 @@ let hairTextures = [
   "media/hair/color-3/hair-6.png",
   "media/hair/color-3/hair-7.png",
   "media/hair/color-3/hair-8.png",
+  null,
+  null,
+  null,
 ]
 
 let shoeTextures = [
@@ -439,7 +442,6 @@ function startGame(first = false) {
 
   doublePoint = false
   jumpingEnabled = true
-  
 
   // spawnHoops(0,0)
 
@@ -730,12 +732,15 @@ function resetCharging() {
 
 function spawnPlayer(side, x, y, id, armSize, headSize, outfitIndex, snow) {
   // headSize = "small" // TESTING
-  
+
   let skinColor = getRandomInt(0, 4)
   let armOffsetInfo = [0, 0, 0.5 * 59, 0.5 * 238]
 
   let hairImage = getRandomArrayElement(hairTextures)
-  console.log(hairImage)
+
+  if (headSize !== "normal") {
+    hairImage = null
+  }
 
   let feetFriction = 2
   if (snow === true) {
@@ -788,7 +793,7 @@ function spawnPlayer(side, x, y, id, armSize, headSize, outfitIndex, snow) {
       armAttachedTextures: [[armRightImage, armOffsetInfo]],
       headAttachedTextures: [
         [headRightImage, headRightImageInfo],
-        [hairImage, [-3, 5, 0.55 * 130, 0.55 * 160]]
+        [hairImage, [-3, 5, 0.55 * 130, 0.55 * 160]],
       ],
       bodyAttachedTextures: [
         [bodyRightImage, [-5, 10, 0.45 * 127, 0.45 * 394]],

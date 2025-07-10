@@ -133,7 +133,9 @@ function engineSpawnPlayer(data) {
   }
 
   for (let imageInfo of data.headAttachedTextures) {
-    imageInfo[0] = getImage(imageInfo[0])
+    if (imageInfo[0]) {
+      imageInfo[0] = getImage(imageInfo[0])
+    } 
   }
 
   GameEngine.emit("spawnPlayer", {
