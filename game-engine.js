@@ -979,6 +979,8 @@ function renderHead(playerId) {
     const textureInfo = headAttachedTextures[index]
     const [image, [xOffset, yOffset, xScale, yScale]] = textureInfo
 
+    // console.log(image.src)
+
     renderImage(image, flip, head, xOffset, yOffset, xScale, yScale)
   }
 
@@ -1561,7 +1563,7 @@ function throwBall(
 
   const endPosition = [targetPos[0] + targetXOffset, targetPos[1]]
   const startPosition = [ball.getPosition().x, ball.getPosition().y]
-  const velocity = computeThrowVelocity(startPosition, endPosition, maxHeight)
+  let velocity = computeThrowVelocity(startPosition, endPosition, maxHeight)
 
   velocity = Vec2(velocity.x * throttle, velocity.y * throttle)
 

@@ -108,6 +108,33 @@ let headTextures = [
   "media/head/right-5.png",
 ]
 
+let hairTextures = [
+  "media/hair/color-1/hair-1.png",
+  "media/hair/color-1/hair-2.png",
+  "media/hair/color-1/hair-3.png",
+  "media/hair/color-1/hair-4.png",
+  "media/hair/color-1/hair-5.png",
+  "media/hair/color-1/hair-6.png",
+  "media/hair/color-1/hair-7.png",
+  "media/hair/color-1/hair-8.png",
+  "media/hair/color-2/hair-1.png",
+  "media/hair/color-2/hair-2.png",
+  "media/hair/color-2/hair-3.png",
+  "media/hair/color-2/hair-4.png",
+  "media/hair/color-2/hair-5.png",
+  "media/hair/color-2/hair-6.png",
+  "media/hair/color-2/hair-7.png",
+  "media/hair/color-2/hair-8.png",
+  "media/hair/color-3/hair-1.png",
+  "media/hair/color-3/hair-2.png",
+  "media/hair/color-3/hair-3.png",
+  "media/hair/color-3/hair-4.png",
+  "media/hair/color-3/hair-5.png",
+  "media/hair/color-3/hair-6.png",
+  "media/hair/color-3/hair-7.png",
+  "media/hair/color-3/hair-8.png",
+]
+
 let shoeTextures = [
   "media/shoe/right-1.png",
   "media/shoe/right-2.png",
@@ -707,6 +734,9 @@ function spawnPlayer(side, x, y, id, armSize, headSize, outfitIndex, snow) {
   let skinColor = getRandomInt(0, 4)
   let armOffsetInfo = [0, 0, 0.5 * 59, 0.5 * 238]
 
+  let hairImage = getRandomArrayElement(hairTextures)
+  console.log(hairImage)
+
   let feetFriction = 2
   if (snow === true) {
     feetFriction = 0.1
@@ -758,6 +788,7 @@ function spawnPlayer(side, x, y, id, armSize, headSize, outfitIndex, snow) {
       armAttachedTextures: [[armRightImage, armOffsetInfo]],
       headAttachedTextures: [
         [headRightImage, headRightImageInfo],
+        [hairImage, [-3, 5, 0.55 * 130, 0.55 * 160]]
       ],
       bodyAttachedTextures: [
         [bodyRightImage, [-5, 10, 0.45 * 127, 0.45 * 394]],
