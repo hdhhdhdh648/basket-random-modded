@@ -730,7 +730,7 @@ function spawnPlayer(
   y,
   id,
   team,
-  reach = 1.8,
+  reach = 1.8, // Legacy: 1.8
   armSize = 1.2,
   armWidth = 0.3,
   headSize = [0.35, 0.4],
@@ -741,13 +741,12 @@ function spawnPlayer(
   headAttachedTextures,
   bodyAttachedTextures
 ) {
-
   // Errors
-  if (typeof(id) !== "number") {
+  if (typeof id !== "number") {
     console.error('spawnPlayer: "id" argument must be a number.')
     return
   }
-  if (typeof(x) !== "number" || typeof(y) !== "number") {
+  if (typeof x !== "number" || typeof y !== "number") {
     console.error('spawnPlayer: "x" and "y" arguments have to be numbers.')
     return
   }
@@ -756,6 +755,8 @@ function spawnPlayer(
   if (side !== "left" && side !== "right") {
     console.warn('spawnPlayer: "side" argument not specified.')
   }
+
+  console.log(id, team)
 
   playerTeam[id] = team
 
@@ -1275,8 +1276,8 @@ function renderBox(part, color) {
 }
 
 function render() {
-//   ctx.clearRect(0, 0, canvas.width, canvas.height)
-//   simulate()
+  //   ctx.clearRect(0, 0, canvas.width, canvas.height)
+  //   simulate()
 }
 
 function toCanvas(pos) {
@@ -1334,7 +1335,7 @@ function renderShadows() {
 
 function areBodiesTouching(bodyA, bodyB) {
   if (!bodyA || !bodyB) return
-  
+
   for (
     let contact = world.getContactList();
     contact;
@@ -1573,6 +1574,8 @@ function throwBall(
   const ball = ballList[ballId]
   const playerId = ballPickedUpPlayer[ballId]
 
+  if (!ball) return
+
   const endPosition = [targetPos[0] + targetXOffset, targetPos[1]]
   const startPosition = [ball.getPosition().x, ball.getPosition().y]
   let velocity = computeThrowVelocity(startPosition, endPosition, maxHeight)
@@ -1663,18 +1666,32 @@ function ballHandler() {
           (handPosition.y - ballPosition.y) ** 2
       )
 
+      // console.log(playerId, isPlayerPickingUpDisabled[playerId])
+
       if (
         distance < playerBallReach[playerId] &&
-        ballIsPickedUp[ballId] !== true &&
+        // ballIsPickedUp[ballId] !== true &&
         isPlayerPickingUpDisabled[playerId] !== true
       ) {
+        console.log("pick up")
+
         ballIsPickedUp[ballId] = true
         ballPickedUpPlayer[ballId] = playerId
         playerIsPickedUpBall[playerId] = true
-        playerPickedUpBall[playerId] = ballId
-        playerIsPickedUpBall[playerId] = true
 
-        setTeamPickingUp(playerId, true)
+        setTimeout(() => {
+          for (const otherPlayerId in playerList) {
+            playerPickedUpBall[otherPlayerId] = null
+            playerIsPickedUpBall[otherPlayerId] = false
+            isPlayerPickingUpDisabled[playerId] = false
+            setTeamPickingUp(otherPlayerId, false)
+          }
+
+          playerPickedUpBall[playerId] = ballId
+          playerIsPickedUpBall[playerId] = true
+
+          setTeamPickingUp(playerId, true)
+        }, 300)
 
         pickUpBall(ball, hand)
       }
@@ -1685,6 +1702,7 @@ function ballHandler() {
 function setTeamPickingUp(playerId, value) {
   const wantedTeam = playerTeam[playerId]
   for (const [playerId, team] of Object.entries(playerTeam)) {
+    // console.log(playerId, team)
     if (team === wantedTeam) {
       isPlayerPickingUpDisabled[playerId] = value
     }

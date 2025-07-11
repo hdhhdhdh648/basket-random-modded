@@ -539,11 +539,11 @@ function startGame(first = false) {
     let outfitIndex1 = getRandomInt(2, 9)
     let outfitIndex2 = getRandomInt(2, 9)
 
-    spawnPlayer("right", 8.1, 0, 4, armSize, headSize, outfitIndex1, snow)
-    spawnPlayer("right", 3.5, 0, 3, armSize, headSize, outfitIndex1, snow)
+    spawnPlayer("right", 8.1, 0, 4, 2, armSize, headSize, outfitIndex1, snow)
+    spawnPlayer("right", 3.5, 0, 3, 2, armSize, headSize, outfitIndex1, snow)
 
-    spawnPlayer("left", -8.1, 0, 1, armSize, headSize, outfitIndex2, snow)
-    spawnPlayer("left", -3.5, 0, 2, armSize, headSize, outfitIndex2, snow)
+    spawnPlayer("left", -8.1, 0, 1, 1, armSize, headSize, outfitIndex2, snow)
+    spawnPlayer("left", -3.5, 0, 2, 1, armSize, headSize, outfitIndex2, snow)
 
     for (let index in playerAllIds) {
       let id = playerAllIds[index]
@@ -730,8 +730,10 @@ function resetCharging() {
 
 // Player
 
-function spawnPlayer(side, x, y, id, armSize, headSize, outfitIndex, snow) {
+function spawnPlayer(side, x, y, id, team, armSize, headSize, outfitIndex, snow) {
   // headSize = "small" // TESTING
+
+  console.log(team)
 
   let skinColor = getRandomInt(0, 4)
   let armOffsetInfo = [0, 0, 0.5 * 59, 0.5 * 238]
@@ -785,7 +787,7 @@ function spawnPlayer(side, x, y, id, armSize, headSize, outfitIndex, snow) {
       x: x,
       y: y,
       id: id,
-      team: 2,
+      team: team,
       armSize: armSize,
       headSize: headSize,
       headLowerAngle: headLowerAngle,

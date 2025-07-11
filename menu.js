@@ -143,7 +143,7 @@ function engineSpawnPlayer(data) {
     x: data.x,
     y: data.y,
     id: data.id,
-    team: 2,
+    team: data.team,
     armSize: data.armSize,
     headSize: data.headSize,
     headLowerAngle: data.headLowerAngle,
